@@ -24,9 +24,12 @@ package cn.royan.fl.uis
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();
-			bgTexture = texture;
 			
-			weakMap.add("bgTexture", bgTexture);
+			if( texture ){
+				bgTexture = texture;
+				weakMap.add("bgTexture", bgTexture);
+			}
+			
 		}
 		
 		public function draw():void

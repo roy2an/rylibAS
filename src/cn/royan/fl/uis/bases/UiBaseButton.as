@@ -1,13 +1,14 @@
 package cn.royan.fl.uis.bases
 {
-	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.uis.InteractiveUiBase;
-	import cn.royan.fl.uis.UninteractiveUiBase;
-	
 	import flash.display.BitmapData;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
+	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.uis.InteractiveUiBase;
+	import cn.royan.fl.uis.UninteractiveUiBase;
 	
 	public class UiBaseButton extends InteractiveUiBase
 	{
@@ -62,12 +63,12 @@ package cn.royan.fl.uis.bases
 		{
 			bgTextures = new Vector.<UninteractiveUiBase>(statusLen);
 			
-			var frameWidth:int = bgTexture.width / statusLen;
-			var frameHeight:int = bgTexture.height;
 			var i:int = 0;
 			var statusbg:UninteractiveUiBase;
 			if( weakMap.getValue("bgTexture") ){
 				var bmpd:BitmapData;
+				var frameWidth:int = bgTexture.width / statusLen;
+				var frameHeight:int = bgTexture.height;
 				for( i = 0; i < statusLen; i++){
 					bmpd = new BitmapData(frameWidth, frameHeight, true);
 					bmpd.copyPixels( bgTexture, new Rectangle(i * frameWidth, 0, frameWidth, frameHeight), new Point() );
@@ -102,6 +103,8 @@ package cn.royan.fl.uis.bases
 		{
 			selected = !selected;
 			status = selected?SELECTED:status;
+			
+			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE));
 			draw();
 		}
 		

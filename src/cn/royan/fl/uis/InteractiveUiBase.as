@@ -39,9 +39,11 @@ package cn.royan.fl.uis
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();
-			bgTexture = texture;
 			
-			if( bgTexture ) weakMap.add("bgTexture", texture);
+			if( texture ){
+				bgTexture = texture;
+				weakMap.add("bgTexture", bgTexture);
+			}
 			
 			eventMap = new Dictionary(true);
 			

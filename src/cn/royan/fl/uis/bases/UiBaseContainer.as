@@ -30,9 +30,7 @@ package cn.royan.fl.uis.bases
 		public function addItem(item:IUiBase):void
 		{
 			items.push(item);
-			
 			addChild(item as DisplayObject);
-			
 			draw();
 		}
 		
