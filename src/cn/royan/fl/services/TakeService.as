@@ -56,8 +56,6 @@ package cn.royan.fl.services
 			urlstream.addEventListener(IOErrorEvent.IO_ERROR, onError);
 			urlstream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			urlstream.load(urlrequest);
-			
-			trace(urlstream.diskCacheEnabled);
 		}
 		
 		public function close():void

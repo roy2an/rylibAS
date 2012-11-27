@@ -1,9 +1,8 @@
 package cn.royan.fl.interfaces
 {
-	public interface IPool
+	public interface IPool extends IDispose
 	{
 		function getInstance():*;
 		function disposeInstance(instance:*):void;
-		function dispose():void;
 	}
 }
