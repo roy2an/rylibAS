@@ -1,8 +1,9 @@
 package cn.royan.fl.uis.embeds
 {
 	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.IGroupBase;
 
-	public class UiEmbedButtonBar extends UiEmbedSprite
+	public class UiEmbedGroupContainer extends UiEmbedSprite implements IGroupBase
 	{
 		protected var items:Vector.<UiEmbedButton>;
 		protected var isMulti:Boolean;
@@ -10,7 +11,7 @@ package cn.royan.fl.uis.embeds
 		protected var maxLen:uint;
 		protected var values:Array;
 		
-		public function UiEmbedButtonBar()
+		public function UiEmbedGroupContainer()
 		{
 			super();
 			
@@ -18,29 +19,20 @@ package cn.royan.fl.uis.embeds
 			values = [];
 		}
 		
-		public function addItem(item:UiEmbedButton, value:*):void
+		public function addGroupItem(item:*, key:* = null):void
 		{
-			items[value] = item;
-			
+			items[key] = item;
 			item.addEventListener(DatasEvent.DATA_DONE, itemClickHandler);
 		}
 		
 		public function getValues():Array
 		{
-			return null;
+			return values;
 		}
 		
 		protected function itemClickHandler(evt:DatasEvent):void
 		{
-			for( var key:String in items )
-			{
-				if( items[key] == evt.currentTarget )
-				{
-					items[key].isSelected = true;
-				}else{
-					items[key].isSelected = false;
-				}
-			}
+			
 		}
 	}
 }
