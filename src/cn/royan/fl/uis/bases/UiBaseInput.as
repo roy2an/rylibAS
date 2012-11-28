@@ -1,28 +1,26 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiTextBase;
+	import cn.royan.fl.uis.InteractiveUiBase;
+	
 	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
 	import flash.text.TextFormat;
 	
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.uis.InteractiveUiBase;
-	
-	public class UiBaseInput extends InteractiveUiBase
+	public class UiBaseInput extends UiBaseText
 	{
-		protected var inputText:TextField;
-		protected var inputFormat:TextFormat;
-		
-		public function UiBaseInput(texture:BitmapData=null)
+		public function UiBaseInput(label:String='')
 		{
-			super(texture);
+			super(label);
 			
-			inputText = new TextField();
-			inputText.type = TextFieldType.INPUT;
-			inputText.border = true;
+			inputText.mouseEnabled 	= true;
+			inputText.selectable 	= true;
+			inputText.border 		= true;
+			inputText.type 			= TextFieldType.INPUT;
 			inputText.addEventListener(Event.CHANGE, textChangeHandler);
-			addChild(inputText);
 		}
 		
 		protected function textChangeHandler(evt:Event):void
@@ -38,24 +36,18 @@ package cn.royan.fl.uis.bases
 			inputText.height = cHeight;
 		}
 		
-		public function setFormat(format:TextFormat):void
+		override public function getDefaultFormat():TextFormat
 		{
-			inputText.defaultTextFormat = format;
+			if( !defaultFormat ){
+				defaultFormat = new TextFormat();
+				defaultFormat.size = 14;
+			}
+			return defaultFormat;
 		}
 		
 		public function setRestrict(value:String):void
 		{
 			inputText.restrict = value;
-		}
-		
-		public function getText():String
-		{
-			return inputText.text;
-		}
-		
-		public function setText(value:String):void
-		{
-			inputText.text = value;
 		}
 	}
 }

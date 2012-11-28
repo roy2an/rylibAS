@@ -12,9 +12,9 @@ package cn.royan.fl.services
 	
 	import cn.royan.fl.services.bases.MQTTMessage;
 	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.IService;
+	import cn.royan.fl.interfaces.services.IServiceBase;
 	
-	public class MQTTService extends EventDispatcher implements IService
+	public class MQTTService extends EventDispatcher implements IServiceBase
 	{
 		protected var keepalive:int = 10;
 		protected var host:String;

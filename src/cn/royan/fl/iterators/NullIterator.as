@@ -1,8 +1,8 @@
 package cn.royan.fl.iterators
 {
-	import cn.royan.fl.interfaces.IIterator;
+	import cn.royan.fl.interfaces.IIteratorBase;
 	
-	public class NullIterator implements IIterator
+	public class NullIterator implements IIteratorBase
 	{
 		public function NullIterator()
 		{

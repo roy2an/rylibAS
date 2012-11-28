@@ -1,6 +1,6 @@
 package cn.royan.fl.uis.bases
 {
-	import cn.royan.fl.interfaces.IUiBase;
+	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
 	import flash.display.BitmapData;
@@ -78,6 +78,8 @@ package cn.royan.fl.uis.bases
 				items[i] = null;
 				delete items[i];
 			}
+			
+			weakMap.remove("items");
 			
 			items = null;
 		}

@@ -7,10 +7,10 @@ package cn.royan.fl.services
 	import flash.net.URLVariables;
 	
 	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.IService;
-	import cn.royan.fl.utils.DebugUtils;
+	import cn.royan.fl.interfaces.services.IServiceBase;
+	import cn.royan.fl.utils.SystemUtils;
 	
-	public class PushService extends EventDispatcher implements IService
+	public class PushService extends EventDispatcher implements IServiceBase
 	{
 		protected var servicing:Boolean;
 		protected var urlloader:URLLoader;

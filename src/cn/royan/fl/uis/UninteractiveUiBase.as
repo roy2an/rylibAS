@@ -1,7 +1,7 @@
 package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.interfaces.IUiBase;
+	import cn.royan.fl.interfaces.uis.IUiBase;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shape;
@@ -117,8 +117,11 @@ package cn.royan.fl.uis
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") )
+			if( weakMap.getValue("bgTexture") ){
 				bgTexture.dispose();
+				weakMap.remove("bgTexture");
+			}
+				
 			
 			bgTexture = null;
 			bgColors = null;

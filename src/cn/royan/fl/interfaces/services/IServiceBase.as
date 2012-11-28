@@ -1,8 +1,9 @@
-package cn.royan.fl.interfaces
+package cn.royan.fl.interfaces.services
 {
 	import flash.events.IEventDispatcher;
+	import cn.royan.fl.interfaces.IDisposeBase;
 	
-	public interface IService extends IEventDispatcher, IDispose
+	public interface IServiceBase extends IEventDispatcher, IDisposeBase
 	{
 		function sendRequest(url:String='', extra:*=null):void;
 		function connect():void;

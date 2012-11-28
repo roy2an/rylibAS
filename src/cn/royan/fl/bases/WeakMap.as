@@ -53,7 +53,7 @@ package cn.royan.fl.bases
 			return null;
 		}
 		
-		public function remove(key:int):void
+		public function remove(key:*):void
 		{
 			var value:* = getValue(key);
 			var keysets:Array = map[value];

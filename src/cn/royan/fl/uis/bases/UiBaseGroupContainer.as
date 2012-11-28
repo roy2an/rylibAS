@@ -1,16 +1,18 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiGroupBase;
+	import cn.royan.fl.interfaces.uis.IUiSelectBase;
+	import cn.royan.fl.interfaces.uis.IUiBase;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.IGroupBase;
-	import cn.royan.fl.interfaces.IUiBase;
 
-	public class UiBaseGroupContainer extends UiBaseContainer implements IGroupBase
+	public class UiBaseGroupContainer extends UiBaseContainer implements IUiGroupBase
 	{
 		public static const ITEM_SELECTED:String = 'item_selected';
 		
+		protected var selectedItems:Vector.<IUiSelectBase>;
 		protected var isMulti:Boolean;
 		protected var isMust:Boolean;
 		protected var maxLen:uint;
@@ -20,6 +22,10 @@ package cn.royan.fl.uis.bases
 		{
 			super();
 			
+			selectedItems = new Vector.<IUiSelectBase>();
+			
+			weakMap.add("selectedItems", selectedItems);
+			
 			values = [];
 		}
 		
@@ -27,10 +33,11 @@ package cn.royan.fl.uis.bases
 		{
 			if(item.getDispatcher() == null) return;
 			
-			items[key] = item;
-			super.addItem(item);
-			
+			item.setIsInGroup(true);
 			item.getDispatcher().addEventListener(DatasEvent.DATA_DONE, clickHandler);
+			
+			selectedItems[key] = item;
+			addItem(item);
 		}
 		
 		override public function addItem(item:IUiBase):void
@@ -44,9 +51,62 @@ package cn.royan.fl.uis.bases
 			return values;
 		}
 		
+		public function setIsMust(value:Boolean):void
+		{
+			isMust = value;
+		}
+		
+		public function setIsMulti(value:Boolean):void
+		{
+			isMulti = value;
+		}
+		
+		public function setMaxLen(value:int):void
+		{
+			maxLen = value;
+		}
+		
+		protected function getKey(value:*):*
+		{
+			for( var i:* in selectedItems )
+			{
+				if( selectedItems[i] == value )
+				{
+					return selectedItems[i];
+				}
+			}
+			return null;
+		}
+		
 		protected function clickHandler(evt:DatasEvent):void
 		{
-			
+			var key:* = getKey(evt.currentTarget);
+			var giveUpKey:*;
+			if(values.indexOf(key) == -1){
+				if(!isMust){
+					values.splice(values.indexOf(key), 1);
+					selectedItems[key].setSelected(false);
+				}
+			}else{
+				if( isMulti ){
+					if( maxLen > values.length )
+					{
+						values.push(key);
+					}else{
+						giveUpKey = values.shift();
+						if(selectedItems[giveUpKey])
+							selectedItems[giveUpKey].setSelected(false);
+						values.push(key);
+						selectedItems[key].setSelected(true);
+					}
+				}else{
+					giveUpKey = values.shift();
+					if(selectedItems[giveUpKey])
+						selectedItems[giveUpKey].setSelected(false);
+					values = [key];
+					selectedItems[key].setSelected(true);
+				}
+			}
 		}
 		
 		override protected function removeFromStageHandler(evt:Event):void

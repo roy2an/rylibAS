@@ -1,12 +1,12 @@
 package cn.royan.fl.uis.embeds
 {
-	import cn.royan.fl.interfaces.IPlayBase;
+	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
 	
-	public class UiEmbedSprite extends Sprite implements IPlayBase
+	public class UiEmbedSprite extends Sprite implements IUiPlayBase
 	{
 		protected var eventMap:Dictionary;
 		

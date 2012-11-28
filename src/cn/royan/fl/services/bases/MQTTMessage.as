@@ -1,10 +1,10 @@
 package cn.royan.fl.services.bases
 {
-	import cn.royan.fl.interfaces.IMessage;
+	import cn.royan.fl.interfaces.services.IServiceMessageBase;
 	
 	import flash.utils.ByteArray;
 	
-	public class MQTTMessage extends ByteArray implements IMessage
+	public class MQTTMessage extends ByteArray implements IServiceMessageBase
 	{
 		/* Message types */
 		public static const CONNECT:uint 		= 0x10;

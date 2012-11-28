@@ -2,7 +2,7 @@ package cn.royan.fl.mvcs
 {
 	import flash.display.DisplayObjectContainer;
 	
-	import cn.royan.fl.bases.EventMap;
+	import cn.royan.fl.bases.mvcs.EventMap;
 	import cn.royan.fl.events.DatasEvent;
 
 	public class View extends DisplayObjectContainer 

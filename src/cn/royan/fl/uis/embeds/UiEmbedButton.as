@@ -1,15 +1,16 @@
 package cn.royan.fl.uis.embeds
 {
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiSelectBase;
+	
 	import flash.display.FrameLabel;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.external.ExternalInterface;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
-	
-	import cn.royan.fl.events.DatasEvent;
 
-	public class UiEmbedButton extends UiEmbedMovieClip
+	public class UiEmbedButton extends UiEmbedMovieClip implements IUiSelectBase
 	{
 		protected var selected:Boolean;
 		protected var jump:Boolean;
@@ -65,7 +66,7 @@ package cn.royan.fl.uis.embeds
 		
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
-			if( !isSelected && !disabled )
+			if( !selected && !disabled )
 			{
 				if( labels[1] ) goTo(labels[1]);
 				else getIn();
@@ -75,7 +76,7 @@ package cn.royan.fl.uis.embeds
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
-			if( !isSelected )
+			if( !selected )
 			{
 				if( labels[0] ) goTo(labels[0]);
 				else getOut();
@@ -107,15 +108,15 @@ package cn.royan.fl.uis.embeds
 			removeEventListener(Event.ENTER_FRAME, mouseDownEnterFrameHandler);
 		}
 		
-		public function get isSelected():Boolean
+		public function getSelected():Boolean
 		{
 			return selected;
 		}
 		
-		public function set isSelected(value:Boolean):void
+		public function setSelected(value:Boolean):void
 		{
 			selected = value;
-			if( isSelected )
+			if( selected )
 			{
 				if( labels[2] ) goTo( labels[2] );
 				else getIn();

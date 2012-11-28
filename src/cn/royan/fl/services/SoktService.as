@@ -2,9 +2,9 @@ package cn.royan.fl.services
 {
 	import flash.events.EventDispatcher;
 	
-	import cn.royan.fl.interfaces.IService;
+	import cn.royan.fl.interfaces.services.IServiceBase;
 	
-	public class SoktService extends EventDispatcher implements IService
+	public class SoktService extends EventDispatcher implements IServiceBase
 	{
 		protected var servicing:Boolean;
 		

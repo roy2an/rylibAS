@@ -1,23 +1,25 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiSelectBase;
+	import cn.royan.fl.uis.InteractiveUiBase;
+	import cn.royan.fl.uis.UninteractiveUiBase;
+	
 	import flash.display.BitmapData;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
-	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.uis.InteractiveUiBase;
-	import cn.royan.fl.uis.UninteractiveUiBase;
-	
-	public class UiBaseButton extends InteractiveUiBase
+	public class UiBaseButton extends InteractiveUiBase implements IUiSelectBase
 	{
 		protected var btnHitArea:InteractiveUiBase;
 		protected var bgTextures:Vector.<UninteractiveUiBase>;
 		protected var btnLabel:String;
-		protected var btnLabelText:UiBaseLabel;
+		protected var btnLabelText:UiBaseText;
 		protected var btnBackgroundContainer:InteractiveUiBase;
 		protected var type:int;
+		protected var isInGroup:Boolean;
 		
 		public function UiBaseButton(label:String = '', texture:BitmapData = null, frames:uint = 5)
 		{
@@ -94,18 +96,21 @@ package cn.royan.fl.uis.bases
 		
 		protected function initLabel():void
 		{
-			btnLabelText = new UiBaseLabel(btnLabel);
+			btnLabelText = new UiBaseText(btnLabel);
 			btnLabelText.setSize(containerWidth, containerHeight);
 			addChild(btnLabelText);
 		}
 		
 		override protected function mouseClickHandler(evt:MouseEvent):void
 		{
-			selected = !selected;
-			status = selected?SELECTED:status;
+			if( !isInGroup ){
+				selected = !selected;
+				status = selected?SELECTED:status;
+				
+				draw();
+			}
 			
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE));
-			draw();
 		}
 		
 		override public function getDefaultBackgroundColors():Array
@@ -140,10 +145,22 @@ package cn.royan.fl.uis.bases
 			draw();
 		}
 		
+		public function getSelected():Boolean
+		{
+			return selected;
+		}
+		
+		public function setIsInGroup(value:Boolean):void
+		{
+			isInGroup = value;
+		}
+		
 		override public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") )
+			if( weakMap.getValue("bgTexture") ){
 				bgTexture.dispose();
+				weakMap.remove("bgTexture");
+			}
 			
 			var i:int = 0;
 			var len:int = weakMap.getValue("bgTextures")?bgTextures.length:0;
@@ -154,6 +171,8 @@ package cn.royan.fl.uis.bases
 				bgTextures[i] = null;
 				delete bgTextures[i];
 			}
+			
+			weakMap.remove("bgTextures");
 			
 			bgTexture = null;
 			bgTextures = null;

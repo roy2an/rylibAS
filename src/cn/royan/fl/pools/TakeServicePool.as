@@ -1,9 +1,9 @@
 package cn.royan.fl.pools
 {
-	import cn.royan.fl.interfaces.IPool;
+	import cn.royan.fl.interfaces.IPoolBase;
 	import cn.royan.fl.services.TakeService;
 	
-	public class TakeServicePool implements IPool
+	public class TakeServicePool implements IPoolBase
 	{
 		protected var pools:Vector.<TakeService>;
 		protected var counter:int;

@@ -1,8 +1,8 @@
 package cn.royan.fl.uis.embeds
 {
 	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.interfaces.IPlayBase;
-	import cn.royan.fl.utils.DebugUtils;
+	import cn.royan.fl.interfaces.uis.IUiPlayBase;
+	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.MovieClip;
 	import flash.events.Event;
@@ -10,7 +10,7 @@ package cn.royan.fl.uis.embeds
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
-	public class UiEmbedMovieClip extends MovieClip implements IPlayBase
+	public class UiEmbedMovieClip extends MovieClip implements IUiPlayBase
 	{
 		protected var weakMap:WeakMap;
 		protected var eventMap:Dictionary;
@@ -117,7 +117,7 @@ package cn.royan.fl.uis.embeds
 		
 		public function goFromTo(from:int, to:int):void
 		{
-			DebugUtils.print("play from["+from+"] to ["+to+"]");
+			SystemUtils.print("play from["+from+"] to ["+to+"]");
 			loop = false;
 			sequence = from <= to;
 			toFrame = to;
@@ -136,7 +136,10 @@ package cn.royan.fl.uis.embeds
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("timer") ) timer = null;
+			if( weakMap.getValue("timer") ){
+				weakMap.remove("timer");
+				timer = null;
+			}
 		}
 		
 		protected function removeFromStageHandler(evt:Event):void

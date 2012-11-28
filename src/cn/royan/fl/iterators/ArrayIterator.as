@@ -1,8 +1,8 @@
 package cn.royan.fl.iterators
 {
-	import cn.royan.fl.interfaces.IIterator;
+	import cn.royan.fl.interfaces.IIteratorBase;
 	
-	public class ArrayIterator implements IIterator
+	public class ArrayIterator implements IIteratorBase
 	{
 		protected var _source:Array;
 		protected var _index:int;

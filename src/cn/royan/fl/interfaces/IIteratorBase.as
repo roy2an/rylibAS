@@ -1,6 +1,6 @@
 package cn.royan.fl.interfaces
 {
-	public interface IIterator
+	public interface IIteratorBase
 	{
 		function reset():void;
 		function hasNext():Boolean;

@@ -1,10 +1,10 @@
 package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.interfaces.IPlayBase;
+	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
-	import cn.royan.fl.utils.DebugUtils;
+	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -14,7 +14,7 @@ package cn.royan.fl.uis.bases
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
-	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IPlayBase
+	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IUiPlayBase
 	{
 		protected var bgTextures:Vector.<UninteractiveUiBase>;
 		protected var timer:Timer;
@@ -115,7 +115,7 @@ package cn.royan.fl.uis.bases
 		
 		public function goFromTo(from:int, to:int):void
 		{
-			DebugUtils.print("play from["+from+"] to ["+to+"]");
+			SystemUtils.print("play from["+from+"] to ["+to+"]");
 			loop = false;
 			sequence = from <= to;
 			current = from;
@@ -131,8 +131,10 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") )
+			if( weakMap.getValue("bgTexture") ){
 				bgTexture.dispose();
+				weakMap.remove("bgTexture");
+			}
 			
 			var i:int = 0;
 			var len:int = weakMap.getValue("bgTextures")?bgTextures.length:0;
@@ -144,8 +146,12 @@ package cn.royan.fl.uis.bases
 				delete bgTextures[i];
 			}
 			
-			if( weakMap.getValue("timer") )
+			weakMap.remove("bgTextures");
+			
+			if( weakMap.getValue("timer") ){
 				timer = null;
+				weakMap.remove("timer");
+			}
 			
 			bgTexture = null;
 			bgTextures = null;

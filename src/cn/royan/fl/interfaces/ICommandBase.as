@@ -1,6 +1,6 @@
 package cn.royan.fl.interfaces
 {
-	public interface ICommand
+	public interface ICommandBase
 	{
 		function execute():void;
 	}

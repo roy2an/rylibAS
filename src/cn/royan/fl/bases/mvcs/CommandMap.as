@@ -1,4 +1,4 @@
-package cn.royan.fl.bases
+package cn.royan.fl.bases.mvcs
 {
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;

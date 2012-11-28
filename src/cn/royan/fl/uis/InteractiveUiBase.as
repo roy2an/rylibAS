@@ -1,7 +1,7 @@
 package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.interfaces.IUiBase;
+	import cn.royan.fl.interfaces.uis.IUiBase;
 	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -42,6 +42,7 @@ package cn.royan.fl.uis
 			
 			if( texture ){
 				bgTexture = texture;
+				setSize(bgTexture.width, bgTexture.height);
 				weakMap.add("bgTexture", bgTexture);
 			}
 			
@@ -63,6 +64,8 @@ package cn.royan.fl.uis
 			addEventListener(MouseEvent.MOUSE_UP, 		mouseUpHandler);
 			
 			addEventListener(MouseEvent.CLICK, 			mouseClickHandler);
+			
+			draw();
 		}
 		
 		protected function removeFromStageHandler(evt:Event):void
@@ -245,8 +248,10 @@ package cn.royan.fl.uis
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") )
+			if( weakMap.getValue("bgTexture") ){
 				bgTexture.dispose();
+				weakMap.remove("bgTexture");
+			}
 			
 			bgTexture = null;
 			bgColors = null;

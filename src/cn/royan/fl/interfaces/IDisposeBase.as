@@ -1,6 +1,6 @@
 package cn.royan.fl.interfaces
 {
-	public interface IDispose
+	public interface IDisposeBase
 	{
 		function dispose():void;
 	}

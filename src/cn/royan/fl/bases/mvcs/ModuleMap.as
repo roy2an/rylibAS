@@ -1,13 +1,13 @@
-package cn.royan.fl.bases
+package cn.royan.fl.bases.mvcs
 {
-	import cn.royan.fl.interfaces.IDispose;
-	import cn.royan.fl.interfaces.IMessage;
+	import cn.royan.fl.interfaces.IDisposeBase;
+	import cn.royan.fl.interfaces.services.IServiceMessageBase;
 	
 	import flash.utils.Dictionary;
 	
 	import mx.modules.Module;
 
-	public class ModuleMap implements IDispose
+	public class ModuleMap implements IDisposeBase
 	{
 		private static var _map:Dictionary = new Dictionary(true);
 		private static var _instance:ModuleMap;
@@ -24,9 +24,11 @@ package cn.royan.fl.bases
 			moduleDeal = deal;
 			
 			_map[key] = this;
+			
+			sendModuleMessage(new ModuleMessage());
 		}
 		
-		public function sendMessage(message:IMessage, toKey:String=''):void
+		public function sendModuleMessage(message:IServiceMessageBase, toKey:String=''):void
 		{
 			for each( var moduleMap:ModuleMap in _map )
 			{

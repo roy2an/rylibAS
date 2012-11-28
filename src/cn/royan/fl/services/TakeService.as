@@ -1,5 +1,10 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.services.IServiceBase;
+	import cn.royan.fl.utils.SystemUtils;
+	
+	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -9,18 +14,18 @@ package cn.royan.fl.services
 	import flash.net.URLRequestMethod;
 	import flash.net.URLStream;
 	import flash.net.URLVariables;
+	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.IService;
-	import cn.royan.fl.utils.DebugUtils;
-	
-	public class TakeService extends EventDispatcher implements IService
+	public class TakeService extends EventDispatcher implements IServiceBase
 	{
 		protected var urlstream:URLStream;
 		protected var urlrequest:URLRequest;
 		protected var urlvariable:URLVariables;
 		protected var serviceData:ByteArray;
+		protected var loader:Loader;
+		protected var context:LoaderContext;
 		
 		public function TakeService(param:*=null)
 		{
@@ -90,29 +95,51 @@ package cn.royan.fl.services
 		
 		protected function onComplete(evt:Event):void
 		{
-			DebugUtils.print("[Class TakeService]:onComplete");
+			SystemUtils.print("[Class TakeService]:onComplete");
 			
 			urlstream.readBytes(serviceData, 0, urlstream.bytesAvailable);
+			
+			var format:String = String.fromCharCode(serviceData.readByte()) + 
+				String.fromCharCode(serviceData.readByte()) + 
+				String.fromCharCode(serviceData.readByte());
+			
+			serviceData.position = 0;
+			
+			switch( format ){
+				case "CWS":
+				case "FWS":
+					if( loader == null )
+						loader = new Loader();
+					
+					if( context == null )
+						context = new LoaderContext(false, ApplicationDomain.currentDomain)
+					
+					loader.loadBytes(serviceData, context);
+					
+					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader.content));
+					return;
+					break;
+			}
 			
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, data));
 		}
 		
 		protected function onProgress(evt:ProgressEvent):void
 		{
-			DebugUtils.print("[Class TakeService]:onProgress:"+evt.bytesLoaded+"/"+evt.bytesTotal);
+			SystemUtils.print("[Class TakeService]:onProgress:"+evt.bytesLoaded+"/"+evt.bytesTotal);
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, {loaded:evt.bytesLoaded, total:evt.bytesTotal}));
 		}
 		
 		protected function onError(evt:IOErrorEvent):void
 		{
-			DebugUtils.print("[Class TakeService]:onError:"+evt.type);
+			SystemUtils.print("[Class TakeService]:onError:"+evt.type);
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			close();
 		}
 		
 		protected function onSecurityError(evt:SecurityErrorEvent):void
 		{
-			DebugUtils.print("[Class TakeService]:onSecurityError:"+evt.type);
+			SystemUtils.print("[Class TakeService]:onSecurityError:"+evt.type);
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			close();
 		}

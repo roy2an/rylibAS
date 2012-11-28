@@ -1,8 +1,9 @@
-package cn.royan.fl.interfaces
+package cn.royan.fl.interfaces.uis
 {
 	import flash.events.EventDispatcher;
+	import cn.royan.fl.interfaces.IDisposeBase;
 
-	public interface IUiBase extends IDispose
+	public interface IUiBase extends IDisposeBase
 	{
 		function draw():void;
 		function getDefaultBackgroundColors():Array;

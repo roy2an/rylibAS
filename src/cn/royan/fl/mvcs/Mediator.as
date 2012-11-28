@@ -3,8 +3,8 @@ package cn.royan.fl.mvcs
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
-	import cn.royan.fl.bases.CommandMap;
-	import cn.royan.fl.bases.EventMap;
+	import cn.royan.fl.bases.mvcs.CommandMap;
+	import cn.royan.fl.bases.mvcs.EventMap;
 	import cn.royan.fl.bases.WeakMap;
 
 	public class Mediator
