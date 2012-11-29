@@ -50,7 +50,6 @@ package cn.royan.fl.resources
 				
 				parseXMLNodeToObject(xmlDoc, configData);
 				SystemUtils.print("[Class ConfigFile]:XMLDocument");
-				//readObject(configData);
 			}
 		}
 		
@@ -81,20 +80,6 @@ package cn.royan.fl.resources
 				{
 					child[prop] = nodes[i].attributes[prop];
 				}
-			}
-		}
-		
-		protected function readObject(object:Object, index:int = 0):void
-		{
-			for( var prop:String in object ){
-				var str:String = "";
-				var i:int = 0;
-				for(i = 0; i < index; i++){
-					str += " ";
-				}
-				str += "|+";
-				SystemUtils.print('[Class ConfigFile]:'+ str +'Object['+prop+']' );
-				readObject(object[prop], index+1);
 			}
 		}
 		

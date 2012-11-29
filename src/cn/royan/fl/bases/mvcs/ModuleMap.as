@@ -9,8 +9,7 @@ package cn.royan.fl.bases.mvcs
 
 	public class ModuleMap implements IDisposeBase
 	{
-		private static var _map:Dictionary = new Dictionary(true);
-		private static var _instance:ModuleMap;
+		private static var __map:Dictionary = new Dictionary(true);
 		
 		protected var moduleKey:String;
 		protected var moduleDeal:Function;
@@ -23,14 +22,14 @@ package cn.royan.fl.bases.mvcs
 			moduleKey = key;
 			moduleDeal = deal;
 			
-			_map[key] = this;
+			__map[key] = this;
 			
 			sendModuleMessage(new ModuleMessage());
 		}
 		
 		public function sendModuleMessage(message:IServiceMessageBase, toKey:String=''):void
 		{
-			for each( var moduleMap:ModuleMap in _map )
+			for each( var moduleMap:ModuleMap in __map )
 			{
 				var callback:Function = moduleMap.getDeal();
 				if( toKey )
@@ -52,13 +51,13 @@ package cn.royan.fl.bases.mvcs
 		
 		public function dispose():void
 		{
-			_map[moduleKey] = null;
-			delete _map[moduleKey];
+			__map[moduleKey] = null;
+			delete __map[moduleKey];
 		}
 		
 		protected function containKey(value:String):Boolean
 		{
-			for( var key:String in _map )
+			for( var key:String in __map )
 			{
 				if( key == value )
 					return true;

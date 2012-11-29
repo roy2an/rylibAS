@@ -2,6 +2,7 @@ package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
+	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -18,6 +19,9 @@ package cn.royan.fl.uis
 		public static const SELECTED:int = 3;
 		public static const DISABLE:int = 4;
 		
+		protected static var __weakMap:WeakMap = WeakMap.getInstance();
+		
+		protected var uid:uint;
 		protected var status:uint;
 		protected var statusLen:uint;
 		protected var selected:Boolean;
@@ -29,13 +33,11 @@ package cn.royan.fl.uis
 		protected var containerWidth:Number;
 		protected var containerHeight:Number;
 		
-		protected var weakMap:WeakMap;
-		
 		public function InteractiveUiBase(texture:BitmapData = null)
 		{
 			super();
 			
-			weakMap = new WeakMap();
+			uid = SystemUtils.createObjectUID();
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();
@@ -43,7 +45,7 @@ package cn.royan.fl.uis
 			if( texture ){
 				bgTexture = texture;
 				setSize(bgTexture.width, bgTexture.height);
-				weakMap.add("bgTexture", bgTexture);
+				__weakMap.set("bgTexture"+uid, bgTexture);
 			}
 			
 			eventMap = new Dictionary(true);
@@ -70,15 +72,6 @@ package cn.royan.fl.uis
 		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-//			if( hasEventListener(Event.REMOVED_FROM_STAGE) ) removeEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
-//			
-//			if( hasEventListener(MouseEvent.MOUSE_OVER) ) removeEventListener(MouseEvent.MOUSE_OVER, mouseOverHandler);
-//			if( hasEventListener(MouseEvent.MOUSE_OUT) ) removeEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler);
-//			if( hasEventListener(MouseEvent.MOUSE_DOWN) ) removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
-//			if( hasEventListener(MouseEvent.MOUSE_UP) ) removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
-//			
-//			if( hasEventListener(MouseEvent.CLICK) ) removeEventListener(MouseEvent.CLICK, mouseClickHandler);
-//			
 			for( var type:String in eventMap )
 			{
 				removeEventListener( type, eventMap[type] );
@@ -95,32 +88,32 @@ package cn.royan.fl.uis
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
-			draw();
+			//draw();
 		}
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:NORMAL;
-			draw();
+			//draw();
 		}
 		
 		protected function mouseDownHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:DOWN;
-			draw();
+			//draw();
 		}
 		
 		protected function mouseUpHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
-			draw();
+			//draw();
 		}
 		
 		public function draw():void
 		{
 			graphics.clear();
 			if( containerWidth && containerHeight ){
-				if( weakMap.getValue("bgTexture") ){
+				if( __weakMap.getValue("bgTexture"+uid) ){
 					graphics.beginBitmapFill(bgTexture);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
@@ -148,7 +141,7 @@ package cn.royan.fl.uis
 		{
 			bgColors = value;
 			
-			if( bgColors && bgAlphas && !weakMap.getValue("bgTexture") )
+			if( bgColors && bgAlphas && !__weakMap.getValue("bgTexture"+uid) )
 				statusLen = Math.min(bgColors.length, bgAlphas.length);
 			
 			draw();
@@ -163,7 +156,7 @@ package cn.royan.fl.uis
 		{
 			bgAlphas = value;
 			
-			if( bgColors && bgAlphas && !weakMap.getValue("bgTexture") )
+			if( bgColors && bgAlphas && !__weakMap.getValue("bgTexture"+uid) )
 				statusLen = Math.min(bgColors.length, bgAlphas.length);
 			
 			draw();
@@ -195,6 +188,19 @@ package cn.royan.fl.uis
 		public function getPosition():Array
 		{
 			return [x,y];
+		}
+		
+		public function setTexture(value:BitmapData):void
+		{
+			bgTexture = value;
+			__weakMap.set("bgTexture"+uid, bgTexture);
+			
+			draw();
+		}
+		
+		public function getTexture():BitmapData
+		{
+			return bgTexture;
 		}
 		
 		public function getDispatcher():EventDispatcher
@@ -248,9 +254,9 @@ package cn.royan.fl.uis
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") ){
+			if( __weakMap.getValue("bgTexture"+uid) ){
 				bgTexture.dispose();
-				weakMap.remove("bgTexture");
+				__weakMap.clear("bgTexture"+uid);
 			}
 			
 			bgTexture = null;

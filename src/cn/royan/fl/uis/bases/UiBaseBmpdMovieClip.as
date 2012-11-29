@@ -1,5 +1,6 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
@@ -38,22 +39,34 @@ package cn.royan.fl.uis.bases
 			var frameHeight:int = bgTexture.height / column;
 			var i:int;
 			var frameunit:UninteractiveUiBase;
+			var rectangle:Rectangle = PoolBase.getInstanceByType(Rectangle);
+			rectangle.width = frameWidth;
+				rectangle.height = frameHeight;
+			var point:Point = PoolBase.getInstanceByType(Point);
 			for(i = 0; i < frames; i++){
 				var curRow:int = i / row;
 				var curCol:int = i % column;
 				var bmpd:BitmapData;
-				bmpd = new BitmapData( frameWidth, frameHeight, true);
-				bmpd.copyPixels( bgTexture, new Rectangle(curRow * frameWidth, curCol * frameHeight, frameWidth, frameHeight), new Point() );
-				frameunit = new UninteractiveUiBase( bmpd );
+				
+				rectangle.x = curRow * frameWidth;
+				rectangle.y = curCol * frameHeight
+				
+				bmpd = PoolBase.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
+				bmpd.copyPixels( bgTexture, rectangle, point );
+				frameunit = PoolBase.getInstanceByType(UninteractiveUiBase);
+				frameunit.setTexture(bmpd);
 				bgTextures[i] = frameunit;
 			}
 			
-			weakMap.add("bgTextures", bgTextures);
+			PoolBase.disposeInstance(rectangle);
+			PoolBase.disposeInstance(point);
 			
-			timer = new Timer(1000 / rate);
+			__weakMap.set("bgTextures" + uid, bgTextures);
+			
+			timer = PoolBase.getInstanceByType(Timer, 1000 / rate);
 			timer.addEventListener(TimerEvent.TIMER, timerHandler);
 			
-			weakMap.add("timer", timer);
+			__weakMap.set("timer" + uid, timer);
 			
 			if( stage ) addToStageHandler();
 			else addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
@@ -63,7 +76,7 @@ package cn.royan.fl.uis.bases
 		{
 			super.addToStageHandler(evt);
 			
-			if(weakMap.getValue("bgTextures")[current-1])
+			if(__weakMap.getValue("bgTextures" + uid)[current-1])
 				addChild(bgTextures[current-1]);
 			
 			timer.start();
@@ -91,7 +104,7 @@ package cn.royan.fl.uis.bases
 				}
 			}
 			
-			if(weakMap.getValue("bgTextures")[current-1])
+			if(__weakMap.getValue("bgTextures" + uid)[current-1])
 				addChild(bgTextures[current-1]);
 			
 			if( current == toFrame && !loop )
@@ -123,7 +136,7 @@ package cn.royan.fl.uis.bases
 			
 			removeChildAt(0);
 			
-			if(weakMap.getValue("bgTextures")[current-1])
+			if(__weakMap.getValue("bgTextures" + uid)[current-1])
 				addChild(bgTextures[current-1]);
 			
 			timer.start();
@@ -131,29 +144,30 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") ){
+			if( __weakMap.getValue("bgTexture") + uid ){
 				bgTexture.dispose();
-				weakMap.remove("bgTexture");
+				PoolBase.disposeInstance(bgTexture);
+				__weakMap.clear("bgTexture" + uid);
 			}
 			
 			var i:int = 0;
-			var len:int = weakMap.getValue("bgTextures")?bgTextures.length:0;
+			var len:int = __weakMap.getValue("bgTextures" + uid)?bgTextures.length:0;
 			for( i; i < len; i++ ){
-				if( bgTextures[i] )
+				if( bgTextures[i] ){
 					bgTextures[i].dispose();
+					PoolBase.disposeInstance(bgTextures[i]);
+				}
 				
-				bgTextures[i] = null;
 				delete bgTextures[i];
 			}
 			
-			weakMap.remove("bgTextures");
+			__weakMap.clear("bgTextures" + uid);
 			
-			if( weakMap.getValue("timer") ){
-				timer = null;
-				weakMap.remove("timer");
+			if( __weakMap.getValue("timer" + uid) ){
+				PoolBase.disposeInstance(timer);
+				__weakMap.clear("timer" + uid);
 			}
 			
-			bgTexture = null;
 			bgTextures = null;
 			bgColors = null;
 			bgAlphas = null;
@@ -163,7 +177,7 @@ package cn.royan.fl.uis.bases
 		{
 			super.removeFromStageHandler(evt);
 			
-			if( weakMap.getValue("timer") && timer.hasEventListener(TimerEvent.TIMER) )
+			if( __weakMap.getValue("timer" + uid) && timer.hasEventListener(TimerEvent.TIMER) )
 				timer.removeEventListener(TimerEvent.TIMER, timerHandler);
 		}
 	}

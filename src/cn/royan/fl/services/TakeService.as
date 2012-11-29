@@ -1,5 +1,6 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -24,8 +25,6 @@ package cn.royan.fl.services
 		protected var urlrequest:URLRequest;
 		protected var urlvariable:URLVariables;
 		protected var serviceData:ByteArray;
-		protected var loader:Loader;
-		protected var context:LoaderContext;
 		
 		public function TakeService(param:*=null)
 		{
@@ -35,7 +34,10 @@ package cn.royan.fl.services
 				}else if( param is String ){
 					urlvariable = new URLVariables( param );
 				}else{
-					throw new Error("param must be URLVariables or String");
+					urlvariable = new URLVariables();
+					for( var key:String in param ){
+						urlvariable[key] = param[key];
+					}
 				}
 			else
 				urlvariable = new URLVariables();
@@ -55,7 +57,7 @@ package cn.royan.fl.services
 			if( serviceData ) serviceData.clear();
 			else serviceData = new ByteArray();
 			
-			urlstream = new URLStream();
+			urlstream = PoolBase.getInstanceByType(URLStream);
 			urlstream.addEventListener(Event.COMPLETE, onComplete);
 			urlstream.addEventListener(ProgressEvent.PROGRESS, onProgress);
 			urlstream.addEventListener(IOErrorEvent.IO_ERROR, onError);
@@ -77,10 +79,11 @@ package cn.royan.fl.services
 			urlstream.removeEventListener(IOErrorEvent.IO_ERROR, onError);
 			urlstream.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
-			urlstream = null;
+			PoolBase.disposeInstance(urlstream);
+			
 			urlrequest = null;
 			urlvariable = null;
-			serviceData.clear();
+			serviceData.length = 0;
 		}
 		
 		public function get data():*
@@ -100,23 +103,19 @@ package cn.royan.fl.services
 			urlstream.readBytes(serviceData, 0, urlstream.bytesAvailable);
 			
 			var format:String = String.fromCharCode(serviceData.readByte()) + 
-				String.fromCharCode(serviceData.readByte()) + 
-				String.fromCharCode(serviceData.readByte());
+								String.fromCharCode(serviceData.readByte()) + 
+								String.fromCharCode(serviceData.readByte());
 			
 			serviceData.position = 0;
 			
 			switch( format ){
 				case "CWS":
 				case "FWS":
-					if( loader == null )
-						loader = new Loader();
+					var loader:Loader = PoolBase.getInstanceByType(Loader);
+					loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
+					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
 					
-					if( context == null )
-						context = new LoaderContext(false, ApplicationDomain.currentDomain)
-					
-					loader.loadBytes(serviceData, context);
-					
-					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader.content));
+					PoolBase.disposeInstance(loader);
 					return;
 					break;
 			}

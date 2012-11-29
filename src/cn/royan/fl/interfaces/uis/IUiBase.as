@@ -1,7 +1,9 @@
 package cn.royan.fl.interfaces.uis
 {
-	import flash.events.EventDispatcher;
 	import cn.royan.fl.interfaces.IDisposeBase;
+	
+	import flash.display.BitmapData;
+	import flash.events.EventDispatcher;
 
 	public interface IUiBase extends IDisposeBase
 	{
@@ -16,7 +18,9 @@ package cn.royan.fl.interfaces.uis
 		function getSize():Array;
 		function setPosition(cX:int, cY:int):void;
 		function getPosition():Array;
+		function setTexture(value:BitmapData):void;
+		function getTexture():BitmapData;
 		function getDispatcher():EventDispatcher;
-		function setEnabled(value:Boolean):void;
+//		function setEnabled(value:Boolean):void;
 	}
 }

@@ -1,6 +1,7 @@
 package cn.royan.fl.uis.bases
 {
 	
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.interfaces.uis.IUiTextBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
@@ -18,15 +19,15 @@ package cn.royan.fl.uis.bases
 		public function UiBaseText(label:String='')
 		{
 			text = label;
-			inputText = new TextField();
+			inputText = PoolBase.getInstanceByType(TextField);
 			
 			inputText.mouseEnabled 	= false;
 			inputText.selectable 	= false;
 			
 			inputText.defaultTextFormat = getDefaultFormat();
 			
-			weakMap.add("inputText", inputText);
-			weakMap.add("defaultFormat", defaultFormat);
+			__weakMap.set("inputText" + uid, inputText);
+			__weakMap.set("defaultFormat" + uid, defaultFormat);
 			
 			addChild(inputText);
 		}
@@ -45,7 +46,7 @@ package cn.royan.fl.uis.bases
 		public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){
-				defaultFormat = new TextFormat();
+				defaultFormat = PoolBase.getInstanceByType(TextFormat);
 				defaultFormat.align = TextFormatAlign.CENTER;
 				defaultFormat.size = 14;
 			}
@@ -72,14 +73,16 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( weakMap.getValue("inputText") ){
-				weakMap.remove("inputText");
-				inputText = null;
+			if( __weakMap.getValue("inputText" + uid) ){
+				__weakMap.clear("inputText" + uid);
+				
+				PoolBase.disposeInstance(inputText);
 			}
 				
-			if( weakMap.getValue("defaultFormat") ){
-				weakMap.remove("defaultFormat");
-				defaultFormat = null;
+			if( __weakMap.getValue("defaultFormat" + uid) ){
+				__weakMap.clear("defaultFormat" + uid);
+				
+				PoolBase.disposeInstance(defaultFormat);
 			}
 		}
 	}

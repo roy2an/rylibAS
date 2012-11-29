@@ -1,5 +1,6 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiSelectBase;
@@ -47,7 +48,7 @@ package cn.royan.fl.uis.bases
 						btnBackgroundContainer.removeChildAt(1);
 					}
 					
-					if(weakMap.getValue("bgTextures")[status])
+					if(__weakMap.getValue("bgTextures" + uid)[status])
 						btnBackgroundContainer.addChild(bgTextures[status]);
 					break;
 				case 1:
@@ -55,7 +56,7 @@ package cn.royan.fl.uis.bases
 						btnBackgroundContainer.removeChildAt(0);
 					}
 					
-					if(weakMap.getValue("bgTextures")[status])
+					if(__weakMap.getValue("bgTextures" + uid)[status])
 						btnBackgroundContainer.addChild(bgTextures[status]);
 					break;
 			}
@@ -67,28 +68,39 @@ package cn.royan.fl.uis.bases
 			
 			var i:int = 0;
 			var statusbg:UninteractiveUiBase;
-			if( weakMap.getValue("bgTexture") ){
+			if( __weakMap.getValue("bgTexture" + uid) ){
 				var bmpd:BitmapData;
 				var frameWidth:int = bgTexture.width / statusLen;
 				var frameHeight:int = bgTexture.height;
+				var rectangle:Rectangle = PoolBase.getInstanceByType(Rectangle);
+					rectangle.width = frameWidth;
+					rectangle.height = frameHeight;
+				var point:Point = PoolBase.getInstanceByType(Point);
 				for( i = 0; i < statusLen; i++){
-					bmpd = new BitmapData(frameWidth, frameHeight, true);
-					bmpd.copyPixels( bgTexture, new Rectangle(i * frameWidth, 0, frameWidth, frameHeight), new Point() );
-					statusbg = new UninteractiveUiBase(bmpd );
+					bmpd = PoolBase.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
+					
+					rectangle.x = i * frameWidth;
+					
+					bmpd.copyPixels( bgTexture, rectangle, point );
+					statusbg = PoolBase.getInstanceByType(UninteractiveUiBase);
+					statusbg.setTexture(bmpd);
 					bgTextures[i] = statusbg;
 				}
 			}else{
 				for( i = 0; i < statusLen; i++){
-					statusbg = new UninteractiveUiBase();
+					statusbg = PoolBase.getInstanceByType(UninteractiveUiBase);
 					statusbg.setBackgroundColors([bgColors[i]]);
 					statusbg.setBackgroundAlphas([bgAlphas[i]]);
 					bgTextures[i] = statusbg;
 				}
 			}
 			
-			weakMap.add("bgTextures", bgTextures);
+			PoolBase.disposeInstance(rectangle);
+			PoolBase.disposeInstance(point);
 			
-			btnBackgroundContainer = new InteractiveUiBase();
+			__weakMap.set("bgTextures" + uid, bgTextures);
+			
+			btnBackgroundContainer = PoolBase.getInstanceByType(InteractiveUiBase);
 			addChild(btnBackgroundContainer);
 			
 			btnBackgroundContainer.addChild(bgTextures[0]);
@@ -96,9 +108,12 @@ package cn.royan.fl.uis.bases
 		
 		protected function initLabel():void
 		{
-			btnLabelText = new UiBaseText(btnLabel);
+			btnLabelText = PoolBase.getInstanceByType(UiBaseText);
+			btnLabelText.setText(btnLabel);
 			btnLabelText.setSize(containerWidth, containerHeight);
 			addChild(btnLabelText);
+			
+			__weakMap.set("btnLabelText" + uid, btnLabelText);
 		}
 		
 		override protected function mouseClickHandler(evt:MouseEvent):void
@@ -157,24 +172,28 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") ){
+			if( __weakMap.getValue("bgTexture" + uid) ){
 				bgTexture.dispose();
-				weakMap.remove("bgTexture");
+				PoolBase.disposeInstance(bgTexture);
+				__weakMap.clear("bgTexture" + uid);
 			}
 			
 			var i:int = 0;
-			var len:int = weakMap.getValue("bgTextures")?bgTextures.length:0;
+			var len:int = __weakMap.getValue("bgTextures" + uid)?bgTextures.length:0;
 			for( i; i < len; i++ ){
-				if( bgTextures[i] )
+				if( bgTextures[i] ){
 					bgTextures[i].dispose();
+					PoolBase.disposeInstance(bgTextures[i]);
+				}
 				
-				bgTextures[i] = null;
 				delete bgTextures[i];
 			}
 			
-			weakMap.remove("bgTextures");
+			__weakMap.clear("bgTextures" + uid);
+			__weakMap.clear("btnLabelText" + uid);
 			
-			bgTexture = null;
+			PoolBase.disposeInstance(btnLabelText);
+			
 			bgTextures = null;
 			bgColors = null;
 			bgAlphas = null;

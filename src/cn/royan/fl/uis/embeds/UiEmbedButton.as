@@ -5,6 +5,7 @@ package cn.royan.fl.uis.embeds
 	
 	import flash.display.FrameLabel;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.external.ExternalInterface;
 	import flash.net.URLRequest;
@@ -174,6 +175,11 @@ package cn.royan.fl.uis.embeds
 		public function set target(value:String):void
 		{
 			urlTarget = value;
+		}
+		
+		public function getDispatcher():EventDispatcher
+		{
+			return this;
 		}
 		
 		protected function gotoURLHandler( url:String, window:String = "_self" ):void

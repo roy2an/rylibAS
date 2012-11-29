@@ -1,5 +1,6 @@
 package cn.royan.fl.uis.embeds
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -12,7 +13,9 @@ package cn.royan.fl.uis.embeds
 	
 	public class UiEmbedMovieClip extends MovieClip implements IUiPlayBase
 	{
-		protected var weakMap:WeakMap;
+		protected static var __weakMap:WeakMap = WeakMap.getInstance();
+		
+		protected var uid:uint;
 		protected var eventMap:Dictionary;
 		protected var timer:Timer;
 		protected var bindToFrameRate:Boolean;
@@ -25,17 +28,18 @@ package cn.royan.fl.uis.embeds
 		{
 			super();
 			
-			weakMap = new WeakMap();
 			bindToFrameRate = auto;
+			
+			uid = SystemUtils.createObjectUID();
 			
 			eventMap = new Dictionary(true);
 			
 			if( !bindToFrameRate )
 			{
-				timer = new Timer( int(1000 / rate) );
+				timer = PoolBase.getInstanceByType(Timer, 1000 / rate);
 				timer.addEventListener(TimerEvent.TIMER, timerHandler);
 				
-				weakMap.add("timer", timer);
+				__weakMap.set("timer" + uid, timer);
 			}else{
 				addEventListener(Event.ENTER_FRAME, enterframeHandler);
 			}
@@ -136,16 +140,14 @@ package cn.royan.fl.uis.embeds
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("timer") ){
-				weakMap.remove("timer");
-				timer = null;
+			if( __weakMap.getValue("timer" + uid) ){
+				PoolBase.disposeInstance(timer);
+				__weakMap.clear("timer" + uid);
 			}
 		}
 		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-//			removeEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
-//			if( hasEventListener(Event.ENTER_FRAME) ) removeEventListener(Event.ENTER_FRAME, enterframeHandler);
 			if( timer && timer.hasEventListener(TimerEvent.TIMER) )
 				timer.removeEventListener(TimerEvent.TIMER, timerHandler);
 			

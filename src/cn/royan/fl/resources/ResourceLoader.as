@@ -1,9 +1,9 @@
 package cn.royan.fl.resources
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.IDisposeBase;
-	import cn.royan.fl.pools.TakeServicePool;
 	import cn.royan.fl.services.TakeService;
 	import cn.royan.fl.utils.SystemUtils;
 	
@@ -18,12 +18,13 @@ package cn.royan.fl.resources
 
 	public class ResourceLoader extends EventDispatcher implements IDisposeBase
 	{
-		private static var _loaderMap:Array = [];
+		protected static var __loaderMap:Array = [];
+		protected static var __weakMap:WeakMap = WeakMap.getInstance();
 		
+		protected var uid:uint;
 		protected var moduleKey:String;
-		protected var weakMap:WeakMap;
+		protected var moduleVer:String;
 		protected var takeService:TakeService;
-		protected var takeServicePool:TakeServicePool;
 		protected var configType:uint;
 		protected var configFile:ConfigFile;
 		protected var currentPath:String;
@@ -31,23 +32,23 @@ package cn.royan.fl.resources
 		
 		public static function getInstance(key:String, container:DisplayObjectContainer, version:String="1.0"):ResourceLoader
 		{
-			if( _loaderMap[key] == null )
+			if( __loaderMap[key] == null )
 			{
-				_loaderMap[key] = new ResourceLoader(key, container, version, new ResourceLoaderType());
+				__loaderMap[key] = new ResourceLoader(key, container, version, new ResourceLoaderType());
 			}
-			return _loaderMap[key];
+			return __loaderMap[key];
 		}
 		
 		public function ResourceLoader(key:String, container:DisplayObjectContainer, version:String, type:ResourceLoaderType)
 		{
+			uid = SystemUtils.createObjectUID();
+			
 			moduleKey = key;
+			moduleVer = version;
+			
 			stageView = container;
 			
-			weakMap = new WeakMap();
-			
-			takeServicePool = new TakeServicePool(10);
-			
-			takeService = takeServicePool.getInstance();
+			takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
 			takeService.addEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
 			takeService.addEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
 			takeService.addEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
@@ -72,7 +73,7 @@ package cn.royan.fl.resources
 		
 		public function getResourceByPath(path:String):*
 		{
-			return weakMap.getValue(path);
+			return __weakMap.getValue(path + uid);
 		}
 		
 		protected function synFileStartLoadHandler():void
@@ -92,7 +93,7 @@ package cn.royan.fl.resources
 				
 				SystemUtils.print("[Class ResourceLoader]:syn File Start:"+currentPath);
 				
-				takeService = takeServicePool.getInstance();
+				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
 				takeService.addEventListener(DatasEvent.DATA_DOING, synFileOnProgressHandler);
 				takeService.addEventListener(DatasEvent.DATA_DONE, synFileOnCompleteHandler);
 				takeService.addEventListener(DatasEvent.DATA_ERROR, synFileOnErrorHandler);
@@ -119,13 +120,14 @@ package cn.royan.fl.resources
 		{
 			SystemUtils.print("[Class ResourceLoader]:syn File OnComplete");
 			
-			weakMap.add(currentPath, evt.params);
+			__weakMap.set(currentPath + uid, evt.params);
 			
 			takeService.removeEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
 			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
 			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
 			takeService.dispose();
-			takeServicePool.disposeInstance(takeService);
+			
+			PoolBase.disposeInstance(takeService);
 			
 			synFileStartLoadHandler();
 		}
@@ -151,7 +153,7 @@ package cn.royan.fl.resources
 				
 				SystemUtils.print("[Class ResourceLoader]:asyn File Start:"+currentPath);
 				
-				takeService = takeServicePool.getInstance();
+				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
 				takeService.addEventListener(DatasEvent.DATA_DOING, asynFileOnProgressHandler);
 				takeService.addEventListener(DatasEvent.DATA_DONE, asynFileOnCompleteHandler);
 				takeService.addEventListener(DatasEvent.DATA_ERROR, asynFileOnErrorHandler);
@@ -171,13 +173,14 @@ package cn.royan.fl.resources
 		{
 			SystemUtils.print("[Class ResourceLoader]:asyn File OnComplete");
 			
-			weakMap.add(currentPath, evt.params);
+			__weakMap.set(currentPath + uid, evt.params);
 			
 			takeService.removeEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
 			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
 			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
 			takeService.dispose();
-			takeServicePool.disposeInstance(takeService);
+			
+			PoolBase.disposeInstance(takeService);
 			
 			asynFileStartLoadHandler();
 		}
@@ -196,7 +199,7 @@ package cn.royan.fl.resources
 		{
 			SystemUtils.print("[Class ResourceLoader]:Config File onComplete");
 			
-			weakMap.add(currentPath, evt.params);
+			__weakMap.set(currentPath + uid, evt.params);
 			
 			configFile = new ConfigFile(evt.params, configType);
 			
@@ -204,7 +207,8 @@ package cn.royan.fl.resources
 			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
 			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
 			takeService.dispose();
-			takeServicePool.disposeInstance(takeService);
+			
+			PoolBase.disposeInstance(takeService);
 			
 			synFileStartLoadHandler();
 		}
@@ -216,9 +220,9 @@ package cn.royan.fl.resources
 		
 		protected function checkResourceByPath(path:String):Boolean
 		{
-			for( var key:String in _loaderMap )
+			for( var key:String in __loaderMap )
 			{
-				if( _loaderMap[key].getResourceByPath(path) ){
+				if( __loaderMap[key].getResourceByPath(path) ){
 					return true;
 					break;
 				}

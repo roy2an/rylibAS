@@ -1,5 +1,6 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiTextBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
@@ -39,7 +40,7 @@ package cn.royan.fl.uis.bases
 		override public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){
-				defaultFormat = new TextFormat();
+				defaultFormat = PoolBase.getInstanceByType(TextFormat);
 				defaultFormat.size = 14;
 			}
 			return defaultFormat;

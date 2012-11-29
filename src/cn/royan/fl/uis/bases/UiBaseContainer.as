@@ -23,13 +23,14 @@ package cn.royan.fl.uis.bases
 		public function UiBaseContainer()
 		{
 			items = new Vector.<IUiBase>();
-			
-			weakMap.add("items", items);
 		}
 		
 		public function addItem(item:IUiBase):void
 		{
 			items.push(item);
+			
+			__weakMap.set("items" + uid + "_" + (items.length - 1), item);
+			
 			addChild(item as DisplayObject);
 			draw();
 		}
@@ -72,14 +73,14 @@ package cn.royan.fl.uis.bases
 		override public function dispose():void
 		{
 			var i:int = 0;
-			var len:int = weakMap.getValue("items")?items.length:0;
+			var len:int = items.length;
 			for( i; i < len; i++ ){
+				__weakMap.clear("items" + uid + "_" + i);
+				
 				items[i].dispose();
 				items[i] = null;
 				delete items[i];
 			}
-			
-			weakMap.remove("items");
 			
 			items = null;
 		}

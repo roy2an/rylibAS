@@ -1,92 +1,147 @@
 package cn.royan.fl.bases
 {
+	import cn.royan.fl.utils.SystemUtils;
+	
 	import flash.utils.Dictionary;
-
+	
 	public class WeakMap
 	{
-		protected var map:Dictionary;
-		protected var keys:Array;
+		private static var __instance:WeakMap;
 		
-		public function WeakMap()
+		private var map:Dictionary;
+		private var keys:Array;
+		private var length:int = 0;
+		
+		public static function getInstance():WeakMap
+		{
+			if( __instance == null )
+				__instance = new WeakMap(new WeakMapType());
+			return __instance;
+		}
+		
+		public function WeakMap(type:WeakMapType)
 		{
 			map = new Dictionary(true);
 			keys = [];
+		}
+		
+		public function getLength():int
+		{
+			return length;
+		}
+		
+		public function getAllKeys():Array
+		{
+			return keys;
+		}
+		
+		public function getValues():Array
+		{
+			var result:Array = [];
+			for (var i:* in map)
+			{
+				result.push(i);
+			}
+			return result;
+		}
+		
+		public function contentValue(value:*):Boolean
+		{
+			for (var i:* in map)
+			{
+				if(i == value)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public function contentKey(key:String):Boolean
+		{
+			for each( var i:* in keys)
+			{
+				if( i == key )
+				{
+					return true;
+				}
+			}
+			return false;
 			
 		}
 		
-		/**
-		 * key与value 多对一
-		 * 
-		 */
-		public function add(key:*, value:*):void
+		public function set(key:String,value:*):void
 		{
-			if( containKey(key) )
+			//如果键存在，删除键
+			if(contentKey(key))
 			{
-				for each( var i:* in map )
+				for each(var i:Array in map)
 				{
-					i.splice( i.indexOf(key), 1)
+					i.splice(i.indexOf(key),1);
 				}
+				length--;
 			}
-			if( containValue(value) )
+			//如果值存在
+			if(contentValue(value))
 			{
+				//增加指向值的键
 				map[value].push(key);
 			}
 			else
 			{
-				map[value] = [key];
+				//指向值的键
+				map[value]=[key];
+			}
+			length++
+			if(keys.indexOf(key)<0)
+			{
+				keys.push(key);
 			}
 		}
 		
-		public function getValue(key:*):*
+		public function getValue(key:String):*
 		{
-			for( var i:* in map )
+			// i 为值
+			for (var item:* in map)
 			{
-				var keysets:Array = map[i];
-				for each(var k:* in keysets)
+				// 指向 i 的键
+				var key_arr:Array = map[item];
+				for each( var k:* in key_arr )
 				{
-					if(k == key)
+					if( k == key )
 					{
-						return i;
+						return item;
 					}
 				}
 			}
 			return null;
 		}
 		
-		public function remove(key:*):void
+		public function getKeys(value:*):Array
+		{
+			return map[value];
+		}
+		
+		public function clear(key:String):void
 		{
 			var value:* = getValue(key);
-			var keysets:Array = map[value];
-			if( keysets )
+			var key_arr:Array = map[value];
+			if( key_arr )
 			{
-				keysets.splice( keysets.indexOf(key), 1 );
-				if( keysets.length <= 0 )
+				key_arr.splice(key_arr.indexOf(key),1);
+				
+				if( key_arr.length <= 0 )
 				{
 					delete map[value];
 				}
 				
-				keys.splice( keys.indexOf(key), 1 );
+				length--;
+				
+				keys.splice(keys.indexOf(key),1);
 			}
 		}
 		
-		public function containKey(key:*):Boolean
-		{
-			for( var i:* in keys )
-			{
-				if( i == key)
-					return true;
-			}
-			return false;
-		}
-		
-		public function containValue(value:*):Boolean
-		{
-			for( var i:* in map )
-			{
-				if( i == value )
-					return true;
-			}
-			return false;
-		}
 	}
 }
+
+class WeakMapType{}

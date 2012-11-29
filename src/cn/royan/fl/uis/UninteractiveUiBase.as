@@ -2,6 +2,7 @@ package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
+	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shape;
@@ -9,7 +10,9 @@ package cn.royan.fl.uis
 
 	public class UninteractiveUiBase extends Shape implements IUiBase
 	{
-		protected var weakMap:WeakMap;
+		protected static var __weakMap:WeakMap = WeakMap.getInstance();
+		
+		protected var uid:uint;
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
 		protected var bgTexture:BitmapData;
@@ -20,14 +23,14 @@ package cn.royan.fl.uis
 		{
 			super();
 			
-			weakMap = new WeakMap();
+			uid = SystemUtils.createObjectUID();
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();
 			
 			if( texture ){
 				bgTexture = texture;
-				weakMap.add("bgTexture", bgTexture);
+				__weakMap.set("bgTexture" + uid, bgTexture);
 			}
 			
 		}
@@ -36,7 +39,7 @@ package cn.royan.fl.uis
 		{
 			graphics.clear();
 			if( containerWidth && containerHeight ){
-				if( weakMap.getValue("bgTexture") ){
+				if( __weakMap.getValue("bgTexture" + uid) ){
 					graphics.beginBitmapFill(bgTexture);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
@@ -105,24 +108,36 @@ package cn.royan.fl.uis
 			return [x,y];
 		}
 		
+		public function setTexture(value:BitmapData):void
+		{
+			bgTexture = value;
+			__weakMap.set("bgTexture"+uid, bgTexture);
+			
+			draw();
+		}
+		
+		public function getTexture():BitmapData
+		{
+			return bgTexture;
+		}
+		
 		final public function getDispatcher():EventDispatcher
 		{
 			return null;
 		}
-		
-		public function setEnabled(value:Boolean):void
-		{
-			
-		}
+//		
+//		final public function setEnabled(value:Boolean):void
+//		{
+//			
+//		}
 		
 		public function dispose():void
 		{
-			if( weakMap.getValue("bgTexture") ){
+			if( __weakMap.getValue("bgTexture" + uid) ){
 				bgTexture.dispose();
-				weakMap.remove("bgTexture");
+				__weakMap.clear("bgTexture" + uid);
 			}
 				
-			
 			bgTexture = null;
 			bgColors = null;
 			bgAlphas = null;

@@ -1,5 +1,12 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.services.IServiceBase;
+	import cn.royan.fl.services.bases.MQTTMessage;
+	import cn.royan.fl.utils.SystemUtils;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -10,12 +17,11 @@ package cn.royan.fl.services
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
-	import cn.royan.fl.services.bases.MQTTMessage;
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.services.IServiceBase;
-	
 	public class MQTTService extends EventDispatcher implements IServiceBase
 	{
+		protected static var __weakMap:WeakMap = WeakMap.getInstance();
+		
+		protected var uid:uint;
 		protected var keepalive:int = 10;
 		protected var host:String;
 		protected var port:int;
@@ -29,14 +35,18 @@ package cn.royan.fl.services
 		protected var timer:Timer;
 		protected var msgid:int;
 		
-		public function MQTTService()
+		public function MQTTService(host:String, port:uint, clientid:String='')
 		{
 			this.host = host;
 			this.port = port;
 			this.clientid = clientid;
 			
-			timer = new Timer(keepalive / 2 * 1000);
+			uid = SystemUtils.createObjectUID();
+			
+			timer = PoolBase.getInstanceByType(Timer, keepalive / 2 * 1000);
 			timer.addEventListener(TimerEvent.TIMER, pingHandler);
+			
+			__weakMap.set("timer" + uid, timer);
 		}
 		
 		public function sendRequest(type:String='', extra:*=null):void
@@ -45,7 +55,7 @@ package cn.royan.fl.services
 				case "publish":
 					if( extra.topic && extra.content )
 					{
-						var bytes:ByteArray = new ByteArray();
+						var bytes:ByteArray = PoolBase.getInstanceByType(ByteArray);
 						writeString(bytes, extra.topic);
 						
 						if( extra.qos )
@@ -60,14 +70,20 @@ package cn.royan.fl.services
 						var messageType:int = MQTTMessage.PUBLISH;
 						if( extra.qos ) messageType += extra.qos << 1;
 						if( extra.retain ) messageType += 1;
-						var mqttBytes:MQTTMessage = new MQTTMessage();
-						mqttBytes.writeMessageType(messageType);
-						mqttBytes.writeMessageValue(bytes);
+						var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+							mqttBytes.writeMessageType(messageType);
+							mqttBytes.writeMessageValue(bytes);
 						
 						socket.writeBytes(mqttBytes);
 						socket.flush();
 						
-						trace( "Publish sent" );
+						bytes.length = 0;
+						mqttBytes.length = 0;
+						
+						PoolBase.disposeInstance(bytes);
+						PoolBase.disposeInstance(mqttBytes);
+						
+						SystemUtils.print( "[Class MQTTService]:Publish sent" );
 					}
 					break;
 				case "subscribe":
@@ -98,10 +114,15 @@ package cn.royan.fl.services
 		
 		public function close():void
 		{
-			var bytes:MQTTMessage = new MQTTMessage();
-			bytes.writeMessageType(MQTTMessage.DISCONNECT);
-			socket.writeBytes(bytes);
+			var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+			mqttBytes.writeMessageType(MQTTMessage.DISCONNECT);
+				
+			socket.writeBytes(mqttBytes);
 			socket.flush();
+			
+			mqttBytes.length = 0;
+			
+			PoolBase.disposeInstance(mqttBytes);
 			
 			socket.close();
 			servicing = false;
@@ -110,6 +131,10 @@ package cn.royan.fl.services
 		
 		public function dispose():void
 		{
+			if( __weakMap.getValue("timer"+uid) ){
+				PoolBase.disposeInstance(timer);
+				__weakMap.clear("timer"+uid);
+			}
 		}
 		
 		public function get data():*
@@ -124,16 +149,16 @@ package cn.royan.fl.services
 		
 		protected function connectHandler(event:Event):void
 		{
-			var bytes:ByteArray = new ByteArray();
-			bytes.writeByte(0x00); //0
-			bytes.writeByte(0x06); //6
-			bytes.writeByte(0x4d); //M
-			bytes.writeByte(0x51); //Q
-			bytes.writeByte(0x49); //I
-			bytes.writeByte(0x73); //S
-			bytes.writeByte(0x64); //D
-			bytes.writeByte(0x70); //P
-			bytes.writeByte(0x03); //Protocol version = 3
+			var bytes:ByteArray = PoolBase.getInstanceByType(ByteArray);
+				bytes.writeByte(0x00); //0
+				bytes.writeByte(0x06); //6
+				bytes.writeByte(0x4d); //M
+				bytes.writeByte(0x51); //Q
+				bytes.writeByte(0x49); //I
+				bytes.writeByte(0x73); //S
+				bytes.writeByte(0x64); //D
+				bytes.writeByte(0x70); //P
+				bytes.writeByte(0x03); //Protocol version = 3
 			var type:int = 0;
 			if( clean ) type += 2;
 			if( will )
@@ -150,24 +175,30 @@ package cn.royan.fl.services
 			writeString(bytes, clientid);
 			writeString(bytes, username?username:"");
 			writeString(bytes, password?password:"");
-			var mqttBytes:MQTTMessage = new MQTTMessage();
-			mqttBytes.writeMessageType(MQTTMessage.CONNECT);
-			mqttBytes.writeMessageValue(bytes);
+			var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+				mqttBytes.writeMessageType(MQTTMessage.CONNECT);
+				mqttBytes.writeMessageValue(bytes);
 			
 			socket.writeBytes(mqttBytes);
 			socket.flush();
+			
+			bytes.length = 0;
+			mqttBytes.length = 0;
+			
+			PoolBase.disposeInstance(bytes);
+			PoolBase.disposeInstance(mqttBytes);
 		}
 		
 		protected function ioerrorHandler(event:IOErrorEvent):void
 		{
-			trace("IO Error: " + event);
+			SystemUtils.print("[Class MQTTService]:IO Error: " + event);
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, event.type));
 		}
 		
 		protected function socketdataHandler(event:ProgressEvent):void
 		{
-			trace( "Socket received " + socket.bytesAvailable + " byte(s) of data:");
-			var result:MQTTMessage = new MQTTMessage();
+			SystemUtils.print( "[Class MQTTService]:Socket received " + socket.bytesAvailable + " byte(s) of data:");
+			var result:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
 			socket.readBytes(result);
 			
 			switch(result.readUnsignedByte()){
@@ -175,42 +206,42 @@ package cn.royan.fl.services
 					result.position = 3;
 					if(result.isConnack())
 					{
-						trace( "Socket connected" );
+						SystemUtils.print( "[Class MQTTService]:Socket connected" );
 						servicing = true;
 						dispatchEvent(new DatasEvent(DatasEvent.DATA_CREATE));
 						
 						timer.start();
 					}else{
-						trace( "Connection failed!" );
+						SystemUtils.print( "[Class MQTTService]:Connection failed!" );
 						dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection failed!"));
 					}
 					break;
 				case MQTTMessage.PUBACK:
-					trace( "Publish Acknowledgment" );
+					SystemUtils.print( "[Class MQTTService]:Publish Acknowledgment" );
 					break;
 				case MQTTMessage.SUBACK:
-					trace( "Subscribe Acknowledgment" );
+					SystemUtils.print( "[Class MQTTService]:Subscribe Acknowledgment" );
 					break;
 				case MQTTMessage.UNSUBACK:
-					trace( "Unsubscribe Acknowledgment" );
+					SystemUtils.print( "[Class MQTTService]:Unsubscribe Acknowledgment" );
 					break;
 				case MQTTMessage.PINGRESP:
-					trace( "Ping Response" );
+					SystemUtils.print( "[Class MQTTService]:Ping Response" );
 					break;
 				default:
-					trace( "Other" );
+					SystemUtils.print( "[Class MQTTService]:Other" );
 			}
 		}
 		
 		protected function securityerrorHandler(event:SecurityErrorEvent):void
 		{
-			trace("Security Error: " + event);
+			SystemUtils.print("[Class MQTTService]:Security Error: " + event);
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, event.type));
 		}
 		
 		protected function closeHandler(event:Event):void
 		{
-			trace("Server close link");
+			SystemUtils.print("[Class MQTTService]:Server close link");
 			servicing = false;
 			dispatchEvent(new DatasEvent(DatasEvent.DATA_DESTROY));
 		}
@@ -221,7 +252,7 @@ package cn.royan.fl.services
 			bytes.writeMessageType(MQTTMessage.PINGREQ);
 			socket.writeBytes(bytes);
 			socket.flush();
-			trace("Ping sent");
+			SystemUtils.print("[Class MQTTService]:Ping sent");
 		}
 		
 		protected function writeString(bytes:ByteArray, str:String):void
