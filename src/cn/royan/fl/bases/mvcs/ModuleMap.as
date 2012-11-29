@@ -5,8 +5,6 @@ package cn.royan.fl.bases.mvcs
 	
 	import flash.utils.Dictionary;
 	
-	import mx.modules.Module;
-
 	public class ModuleMap implements IDisposeBase
 	{
 		private static var __map:Dictionary = new Dictionary(true);

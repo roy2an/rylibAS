@@ -183,6 +183,7 @@ package cn.royan.fl.uis
 		{
 			x = cX;
 			y = cY;
+			draw();
 		}
 		
 		public function getPosition():Array

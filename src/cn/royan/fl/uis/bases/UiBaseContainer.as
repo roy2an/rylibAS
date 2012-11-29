@@ -1,10 +1,9 @@
 package cn.royan.fl.uis.bases
 {
+	import flash.display.DisplayObject;
+	
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
-	
-	import flash.display.BitmapData;
-	import flash.display.DisplayObject;
 	
 	public class UiBaseContainer extends InteractiveUiBase
 	{
@@ -45,6 +44,16 @@ package cn.royan.fl.uis.bases
 		{
 			verticalAlign = value;
 			draw();
+		}
+		
+		public function getItems():Vector.<IUiBase>
+		{
+			return items;
+		}
+		
+		public function getIndexByItem(item:IUiBase):int
+		{
+			return items.indexOf(item);
 		}
 		
 		override public function draw():void

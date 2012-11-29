@@ -1,16 +1,16 @@
 package cn.royan.fl.uis.bases
 {
-	import cn.royan.fl.bases.PoolBase;
-	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.uis.IUiSelectBase;
-	import cn.royan.fl.uis.InteractiveUiBase;
-	import cn.royan.fl.uis.UninteractiveUiBase;
-	
 	import flash.display.BitmapData;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.text.TextFormat;
+	
+	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiSelectBase;
+	import cn.royan.fl.uis.InteractiveUiBase;
+	import cn.royan.fl.uis.UninteractiveUiBase;
 	
 	public class UiBaseButton extends InteractiveUiBase implements IUiSelectBase
 	{
@@ -86,6 +86,9 @@ package cn.royan.fl.uis.bases
 					statusbg.setTexture(bmpd);
 					bgTextures[i] = statusbg;
 				}
+				
+				PoolBase.disposeInstance(rectangle);
+				PoolBase.disposeInstance(point);
 			}else{
 				for( i = 0; i < statusLen; i++){
 					statusbg = PoolBase.getInstanceByType(UninteractiveUiBase);
@@ -94,9 +97,6 @@ package cn.royan.fl.uis.bases
 					bgTextures[i] = statusbg;
 				}
 			}
-			
-			PoolBase.disposeInstance(rectangle);
-			PoolBase.disposeInstance(point);
 			
 			__weakMap.set("bgTextures" + uid, bgTextures);
 			
@@ -163,6 +163,26 @@ package cn.royan.fl.uis.bases
 		public function getSelected():Boolean
 		{
 			return selected;
+		}
+		
+		public function getText():String
+		{
+			return btnLabelText.getText();
+		}
+		
+		public function setText(value:String):void
+		{
+			btnLabelText.setText(value);
+		}
+		
+		public function setFormat(format:TextFormat):void
+		{
+			btnLabelText.setFormat(format);
+		}
+		
+		public function getFormat():TextFormat
+		{
+			return btnLabelText.getFormat();
 		}
 		
 		public function setIsInGroup(value:Boolean):void

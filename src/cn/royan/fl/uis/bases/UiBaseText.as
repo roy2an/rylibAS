@@ -5,7 +5,6 @@ package cn.royan.fl.uis.bases
 	import cn.royan.fl.interfaces.uis.IUiTextBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
-	import flash.display.BitmapData;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
@@ -31,7 +30,6 @@ package cn.royan.fl.uis.bases
 			
 			addChild(inputText);
 		}
-		
 		
 		public function setFormat(format:TextFormat):void
 		{
