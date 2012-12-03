@@ -12,7 +12,6 @@ package cn.royan.fl.resources
 	import flash.display.Stage;
 	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.xml.XMLDocument;
 
@@ -29,6 +28,7 @@ package cn.royan.fl.resources
 		protected var configFile:ConfigFile;
 		protected var currentPath:String;
 		protected var stageView:DisplayObjectContainer;
+		protected var callbacks:Object;
 		
 		public static function getInstance(key:String, container:DisplayObjectContainer, version:String="1.0"):ResourceLoader
 		{
@@ -49,9 +49,9 @@ package cn.royan.fl.resources
 			stageView = container;
 			
 			takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
-			takeService.addEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
-			takeService.addEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
-			takeService.addEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
+			takeService.setCallbacks({done:configFileOnCompleteHandler,
+									  doing:configFileOnProgressHandler,
+									  error:configFileOnErrorHandler});
 		}
 		
 		public function load():void
@@ -63,7 +63,8 @@ package cn.royan.fl.resources
 		
 		public function dispose():void
 		{
-			
+			PoolBase.disposeInstance(configFile);
+			callbacks = null;
 		}
 		
 		public function setConfigType(value:uint):void
@@ -74,6 +75,36 @@ package cn.royan.fl.resources
 		public function getResourceByPath(path:String):*
 		{
 			return __weakMap.getValue(path + uid);
+		}
+		
+		public function setCallbacks(value:Object):void
+		{
+			callbacks = value;
+		}
+		
+		protected function configFileOnProgressHandler(loaded:uint, total:uint):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Config File onProgress");
+		}
+		
+		protected function configFileOnCompleteHandler(data:*):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Config File onComplete");
+			
+			__weakMap.set(currentPath + uid, data);
+			
+			configFile = PoolBase.getInstanceByType(ConfigFile, data, configType);
+			
+			takeService.dispose();
+			
+			PoolBase.disposeInstance(takeService);
+			
+			synFileStartLoadHandler();
+		}
+		
+		protected function configFileOnErrorHandler(message:String):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Config File OnError");
 		}
 		
 		protected function synFileStartLoadHandler():void
@@ -94,45 +125,39 @@ package cn.royan.fl.resources
 				SystemUtils.print("[Class ResourceLoader]:syn File Start:"+currentPath);
 				
 				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
-				takeService.addEventListener(DatasEvent.DATA_DOING, synFileOnProgressHandler);
-				takeService.addEventListener(DatasEvent.DATA_DONE, synFileOnCompleteHandler);
-				takeService.addEventListener(DatasEvent.DATA_ERROR, synFileOnErrorHandler);
+				takeService.setCallbacks({done:synFileOnCompleteHandler,
+										  doing:synFileOnProgressHandler,
+					 					  error:synFileOnErrorHandler});
 				takeService.sendRequest(currentPath);
 				takeService.connect();
 				
 			}else{
 				SystemUtils.print("[Class ResourceLoader]:syn File OnFinish");
-				dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE));
-				
+				if( callbacks && callbacks['synDone'] ) callbacks['synDone']();
 				asynFileStartLoadHandler();	
-				
 				return;
 			}
 		}
 		
-		protected function synFileOnProgressHandler(evt:DatasEvent):void
+		protected function synFileOnProgressHandler(loaded:uint, total:uint):void
 		{
-			SystemUtils.print("[Class ResourceLoader]:syn File OnProgress");
+			
 		}
 		
 		
-		protected function synFileOnCompleteHandler(evt:DatasEvent):void
+		protected function synFileOnCompleteHandler(data:*):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:syn File OnComplete");
 			
-			__weakMap.set(currentPath + uid, evt.params);
+			__weakMap.set(currentPath + uid, data);
 			
-			takeService.removeEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
-			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
-			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
 			takeService.dispose();
-			
 			PoolBase.disposeInstance(takeService);
 			
 			synFileStartLoadHandler();
 		}
 		
-		protected function synFileOnErrorHandler(evt:DatasEvent):void
+		protected function synFileOnErrorHandler(message:String):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:syn File OnError");
 		}
@@ -154,68 +179,37 @@ package cn.royan.fl.resources
 				SystemUtils.print("[Class ResourceLoader]:asyn File Start:"+currentPath);
 				
 				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
-				takeService.addEventListener(DatasEvent.DATA_DOING, asynFileOnProgressHandler);
-				takeService.addEventListener(DatasEvent.DATA_DONE, asynFileOnCompleteHandler);
-				takeService.addEventListener(DatasEvent.DATA_ERROR, asynFileOnErrorHandler);
+				takeService.setCallbacks({done:asynFileOnCompleteHandler,
+										  doing:asynFileOnProgressHandler,
+										  error:asynFileOnErrorHandler});
 				takeService.sendRequest(currentPath);
 				takeService.connect();
-			}else{
 				
+			}else{
+				SystemUtils.print("[Class ResourceLoader]:asyn File OnFinish");
+				if( callbacks && callbacks['asynDone'] ) callbacks['asynDone']();
 			}
 		}
 		
-		protected function asynFileOnProgressHandler(evt:DatasEvent):void
+		protected function asynFileOnProgressHandler(loaded:uint, total:uint):void
 		{
-			SystemUtils.print("[Class ResourceLoader]:asyn File OnProgress");
 		}
 		
-		protected function asynFileOnCompleteHandler(evt:DatasEvent):void
+		protected function asynFileOnCompleteHandler(data:*):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:asyn File OnComplete");
 			
-			__weakMap.set(currentPath + uid, evt.params);
+			__weakMap.set(currentPath + uid, data);
 			
-			takeService.removeEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
-			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
-			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
 			takeService.dispose();
-			
 			PoolBase.disposeInstance(takeService);
 			
 			asynFileStartLoadHandler();
 		}
 		
-		protected function asynFileOnErrorHandler(evt:DatasEvent):void
+		protected function asynFileOnErrorHandler(message:String):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:asyn File OnError");
-		}
-		
-		protected function configFileOnProgressHandler(evt:DatasEvent):void
-		{
-			SystemUtils.print("[Class ResourceLoader]:Config File onProgress");
-		}
-		
-		protected function configFileOnCompleteHandler(evt:DatasEvent):void
-		{
-			SystemUtils.print("[Class ResourceLoader]:Config File onComplete");
-			
-			__weakMap.set(currentPath + uid, evt.params);
-			
-			configFile = new ConfigFile(evt.params, configType);
-			
-			takeService.removeEventListener(DatasEvent.DATA_DOING, configFileOnProgressHandler);
-			takeService.removeEventListener(DatasEvent.DATA_DONE, configFileOnCompleteHandler);
-			takeService.removeEventListener(DatasEvent.DATA_ERROR, configFileOnErrorHandler);
-			takeService.dispose();
-			
-			PoolBase.disposeInstance(takeService);
-			
-			synFileStartLoadHandler();
-		}
-		
-		protected function configFileOnErrorHandler(evt:DatasEvent):void
-		{
-			SystemUtils.print("[Class ResourceLoader]:Config File OnError");
 		}
 		
 		protected function checkResourceByPath(path:String):Boolean

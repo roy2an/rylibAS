@@ -35,9 +35,6 @@ package cn.royan.fl.uis.bases
 			item.getDispatcher().addEventListener(DatasEvent.DATA_DONE, clickHandler);
 			
 			selectedItems[key] = item;
-			
-			__weakMap.set("selectedItems" + uid + "_" + (selectedItems.length - 1), item);
-			
 			addItem(item);
 		}
 		
@@ -110,6 +107,20 @@ package cn.royan.fl.uis.bases
 			}
 		}
 		
+		override public function dispose():void
+		{
+			super.dispose();
+			
+			var i:int = 0;
+			var len:int = selectedItems.length;
+			for( i; i < len; i++ ){
+				selectedItems[i].dispose();
+				delete selectedItems[i];
+			}
+			
+			selectedItems = null;
+		}
+		
 		override protected function removeFromStageHandler(evt:Event):void
 		{
 			var i:int = 0;
@@ -117,8 +128,6 @@ package cn.royan.fl.uis.bases
 			for( i; i < len; i++ ){
 				if( selectedItems[i] && selectedItems[i].getDispatcher().hasEventListener(DatasEvent.DATA_DONE) )
 					selectedItems[i].getDispatcher().removeEventListener(DatasEvent.DATA_DONE, clickHandler);
-				
-				__weakMap.clear("selectedItems" + uid + "_" + i);
 			}
 			super.removeFromStageHandler(evt);
 		}

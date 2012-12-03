@@ -25,6 +25,7 @@ package cn.royan.fl.services
 		protected var urlrequest:URLRequest;
 		protected var urlvariable:URLVariables;
 		protected var serviceData:ByteArray;
+		protected var callbacks:Object;
 		
 		public function TakeService(param:*=null)
 		{
@@ -39,15 +40,24 @@ package cn.royan.fl.services
 						urlvariable[key] = param[key];
 					}
 				}
-			else
-				urlvariable = new URLVariables();
+//			else
+//				urlvariable = new URLVariables();
 		}
 		
 		public function sendRequest(url:String='', extra:*=null):void
 		{
 			urlrequest = new URLRequest(url);
-			urlrequest.data = urlvariable;
+			if( urlvariable ) urlrequest.data = urlvariable;
 			urlrequest.method = extra == URLRequestMethod.POST?extra:URLRequestMethod.GET;
+		}
+		
+		/**
+		 * {done:Function,doing:Function,error:Function}
+		 * 
+		 */
+		public function setCallbacks(value:Object):void
+		{
+			callbacks = value;
 		}
 		
 		public function connect():void
@@ -81,9 +91,11 @@ package cn.royan.fl.services
 			
 			PoolBase.disposeInstance(urlstream);
 			
+			serviceData.length = 0;
+			serviceData = null;
 			urlrequest = null;
 			urlvariable = null;
-			serviceData.length = 0;
+			callbacks = null
 		}
 		
 		public function get data():*
@@ -113,33 +125,36 @@ package cn.royan.fl.services
 				case "FWS":
 					var loader:Loader = PoolBase.getInstanceByType(Loader);
 					loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
-					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
-					
+//					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
+					if( callbacks && callbacks['done'] ) callbacks['done'](loader);
 					PoolBase.disposeInstance(loader);
 					return;
 					break;
 			}
-			
-			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, data));
+			if( callbacks && callbacks['done'] ) callbacks['done'](data);
+//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, data));
 		}
 		
 		protected function onProgress(evt:ProgressEvent):void
 		{
-			SystemUtils.print("[Class TakeService]:onProgress:"+evt.bytesLoaded+"/"+evt.bytesTotal);
-			dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, {loaded:evt.bytesLoaded, total:evt.bytesTotal}));
+			if( callbacks && callbacks['doing'] ) callbacks['doing'](evt.bytesLoaded, evt.bytesTotal);
+//			SystemUtils.print("[Class TakeService]:onProgress:"+evt.bytesLoaded+"/"+evt.bytesTotal);
+//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, {loaded:evt.bytesLoaded, total:evt.bytesTotal}));
 		}
 		
 		protected function onError(evt:IOErrorEvent):void
 		{
 			SystemUtils.print("[Class TakeService]:onError:"+evt.type);
-			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
+//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
+			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
 			close();
 		}
 		
 		protected function onSecurityError(evt:SecurityErrorEvent):void
 		{
 			SystemUtils.print("[Class TakeService]:onSecurityError:"+evt.type);
-			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
+//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
+			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
 			close();
 		}
 	}

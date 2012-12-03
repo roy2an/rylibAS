@@ -1,14 +1,17 @@
 package cn.royan.fl.uis
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.BitmapData;
+	import flash.display.GradientType;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.geom.Matrix;
 	import flash.utils.Dictionary;
 
 	public class InteractiveUiBase extends Sprite implements IUiBase
@@ -18,8 +21,6 @@ package cn.royan.fl.uis
 		public static const DOWN:int = 2;
 		public static const SELECTED:int = 3;
 		public static const DISABLE:int = 4;
-		
-		protected static var __weakMap:WeakMap = WeakMap.getInstance();
 		
 		protected var uid:uint;
 		protected var status:uint;
@@ -32,10 +33,14 @@ package cn.royan.fl.uis
 		protected var bgTexture:BitmapData;
 		protected var containerWidth:Number;
 		protected var containerHeight:Number;
+		protected var matrix:Matrix;
+		protected var isMouseRender:Boolean;
 		
 		public function InteractiveUiBase(texture:BitmapData = null)
 		{
 			super();
+			
+			cacheAsBitmap = true;
 			
 			uid = SystemUtils.createObjectUID();
 			
@@ -45,7 +50,6 @@ package cn.royan.fl.uis
 			if( texture ){
 				bgTexture = texture;
 				setSize(bgTexture.width, bgTexture.height);
-				__weakMap.set("bgTexture"+uid, bgTexture);
 			}
 			
 			eventMap = new Dictionary(true);
@@ -88,37 +92,40 @@ package cn.royan.fl.uis
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
-			//draw();
+			if( isMouseRender ) draw();
 		}
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:NORMAL;
-			//draw();
+			if( isMouseRender ) draw();
 		}
 		
 		protected function mouseDownHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:DOWN;
-			//draw();
+			if( isMouseRender ) draw();
 		}
 		
 		protected function mouseUpHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
-			//draw();
+			if( isMouseRender ) draw();
 		}
 		
 		public function draw():void
 		{
 			graphics.clear();
 			if( containerWidth && containerHeight ){
-				if( __weakMap.getValue("bgTexture"+uid) ){
+				if( bgTexture ){
 					graphics.beginBitmapFill(bgTexture);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}else if( bgAlphas && bgAlphas.length > 1 ){
-					throw new Error("no implements");
+					matrix.createGradientBox(containerWidth, containerHeight, Math.PI / 2, 0, 0);
+					graphics.beginGradientFill(GradientType.LINEAR, bgColors, bgAlphas, [0,255], matrix);
+					graphics.drawRect( 0, 0, containerWidth, containerHeight );
+					graphics.endFill();
 				}else if(  bgAlphas && bgAlphas.length > 0 && bgAlphas[0] > 0 ){
 					graphics.beginFill( bgColors[0], bgAlphas[0] );
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
@@ -141,8 +148,15 @@ package cn.royan.fl.uis
 		{
 			bgColors = value;
 			
-			if( bgColors && bgAlphas && !__weakMap.getValue("bgTexture"+uid) )
+			if( bgColors && bgAlphas && bgTexture == null )
 				statusLen = Math.min(bgColors.length, bgAlphas.length);
+			
+			if( bgColors.length > 1 ){
+				if( matrix )
+					PoolBase.disposeInstance(matrix);
+				
+				matrix = PoolBase.getInstanceByType(Matrix);
+			}
 			
 			draw();
 		}
@@ -156,8 +170,15 @@ package cn.royan.fl.uis
 		{
 			bgAlphas = value;
 			
-			if( bgColors && bgAlphas && !__weakMap.getValue("bgTexture"+uid) )
+			if( bgColors && bgAlphas && bgTexture == null )
 				statusLen = Math.min(bgColors.length, bgAlphas.length);
+			
+			if( bgAlphas.length > 1 ){
+				if( matrix )
+					PoolBase.disposeInstance(matrix);
+				
+				matrix = PoolBase.getInstanceByType(Matrix);
+			}
 			
 			draw();
 		}
@@ -191,11 +212,10 @@ package cn.royan.fl.uis
 			return [x,y];
 		}
 		
-		public function setTexture(value:BitmapData):void
+		public function setTexture(value:BitmapData, frames:uint=1):void
 		{
 			bgTexture = value;
-			__weakMap.set("bgTexture"+uid, bgTexture);
-			
+			setSize( value.width, value.height );
 			draw();
 		}
 		
@@ -207,6 +227,11 @@ package cn.royan.fl.uis
 		public function getDispatcher():EventDispatcher
 		{
 			return this;
+		}
+		
+		public function setMouseRender(value:Boolean):void
+		{
+			isMouseRender = value;
 		}
 		
 		public function setEnabled(value:Boolean):void
@@ -255,12 +280,14 @@ package cn.royan.fl.uis
 		
 		public function dispose():void
 		{
-			if( __weakMap.getValue("bgTexture"+uid) ){
+			if( bgTexture ){
 				bgTexture.dispose();
-				__weakMap.clear("bgTexture"+uid);
+				PoolBase.disposeInstance(bgTexture);
 			}
 			
-			bgTexture = null;
+			if( matrix )
+				PoolBase.disposeInstance(matrix);
+			
 			bgColors = null;
 			bgAlphas = null;
 		}

@@ -25,27 +25,19 @@ package cn.royan.fl.uis.bases
 			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
 			loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
 			
-			__weakMap.set("loaderData" + uid, loaderData);
-			
 			progressTxt = PoolBase.getInstanceByType(UiBaseText);
 			progressTxt.setText("0%");
 			progressTxt.setSize(50, 20);
 			addChild(progressTxt);
-			
-			__weakMap.set("progressTxt" + uid, progressTxt);
 			
 			progressBar = PoolBase.getInstanceByType(UninteractiveUiBase);
 			progressBar.setBackgroundColors([0xFF0000]);
 			progressBar.setSize(100, 10);
 			addChild(progressBar);
 			
-			__weakMap.set("progressBar" + uid, progressBar);
-			
 			currentFileName = PoolBase.getInstanceByType(UiBaseText);
 			currentFileName.setSize(100, 20);
 			addChild(currentFileName);
-			
-			__weakMap.set("currentFileName" + uid, currentFileName);
 		}
 		
 		public function setFileName(fileName:String, desp:String):void
@@ -66,26 +58,20 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( __weakMap.getValue("loaderData" + uid) ){
-				__weakMap.clear("loaderData" + uid);
-				
+			super.dispose();
+			
+			if( loaderData )
 				PoolBase.disposeInstance(loaderData);
-			}
-			if( __weakMap.getValue("progressTxt" + uid) ){
-				__weakMap.clear("progressTxt" + uid);
-				
+			
+			if( progressTxt )
 				PoolBase.disposeInstance(progressTxt);
-			}
-			if( __weakMap.getValue("progressBar" + uid) ){
-				__weakMap.clear("progressBar" + uid);
-				
+			
+			if( progressBar )
 				PoolBase.disposeInstance(progressBar);
-			}
-			if( __weakMap.getValue("currentFileName" + uid) ){
-				__weakMap.clear("currentFileName" + uid);
-				
+			
+			if( currentFileName )
 				PoolBase.disposeInstance(currentFileName);
-			}
+			
 		}
 	}
 }

@@ -1,16 +1,16 @@
 package cn.royan.fl.uis.bases
 {
-	import flash.display.BitmapData;
-	import flash.events.MouseEvent;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.text.TextFormat;
-	
 	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiSelectBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
+	
+	import flash.display.BitmapData;
+	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.text.TextFormat;
 	
 	public class UiBaseButton extends InteractiveUiBase implements IUiSelectBase
 	{
@@ -27,6 +27,7 @@ package cn.royan.fl.uis.bases
 			super(texture);
 			
 			btnLabel = label;
+			buttonMode = true;
 			
 			if( bgColors && bgAlphas )
 				statusLen = Math.min(bgColors.length, bgAlphas.length);
@@ -38,26 +39,32 @@ package cn.royan.fl.uis.bases
 			
 			initBackground();
 			initLabel();
+			
+			setMouseRender(true);
 		}
 		
 		override public function draw():void
 		{
 			switch(type){
 				case 0:
-					while(btnBackgroundContainer.numChildren > 1){
-						btnBackgroundContainer.removeChildAt(1);
+					if( btnBackgroundContainer ){
+						while(btnBackgroundContainer.numChildren > 1){
+							btnBackgroundContainer.removeChildAt(1);
+						}
+						
+						if( bgTextures[status] )
+							btnBackgroundContainer.addChild(bgTextures[status]);
 					}
-					
-					if(__weakMap.getValue("bgTextures" + uid)[status])
-						btnBackgroundContainer.addChild(bgTextures[status]);
 					break;
 				case 1:
-					while(btnBackgroundContainer.numChildren){
-						btnBackgroundContainer.removeChildAt(0);
+					if( btnBackgroundContainer ){
+						while(btnBackgroundContainer.numChildren){
+							btnBackgroundContainer.removeChildAt(0);
+						}
+						
+						if(bgTextures[status])
+							btnBackgroundContainer.addChild(bgTextures[status]);
 					}
-					
-					if(__weakMap.getValue("bgTextures" + uid)[status])
-						btnBackgroundContainer.addChild(bgTextures[status]);
 					break;
 			}
 		}
@@ -68,7 +75,7 @@ package cn.royan.fl.uis.bases
 			
 			var i:int = 0;
 			var statusbg:UninteractiveUiBase;
-			if( __weakMap.getValue("bgTexture" + uid) ){
+			if( bgTexture ){
 				var bmpd:BitmapData;
 				var frameWidth:int = bgTexture.width / statusLen;
 				var frameHeight:int = bgTexture.height;
@@ -80,6 +87,7 @@ package cn.royan.fl.uis.bases
 					bmpd = PoolBase.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
 					
 					rectangle.x = i * frameWidth;
+					rectangle.y = 0 * frameHeight;
 					
 					bmpd.copyPixels( bgTexture, rectangle, point );
 					statusbg = PoolBase.getInstanceByType(UninteractiveUiBase);
@@ -92,13 +100,11 @@ package cn.royan.fl.uis.bases
 			}else{
 				for( i = 0; i < statusLen; i++){
 					statusbg = PoolBase.getInstanceByType(UninteractiveUiBase);
-					statusbg.setBackgroundColors([bgColors[i]]);
-					statusbg.setBackgroundAlphas([bgAlphas[i]]);
+					statusbg.setBackgroundColors(bgColors[i].length > 1?bgColors[i]:[bgColors[i]]);
+					statusbg.setBackgroundAlphas(bgAlphas[i].length > 1?bgAlphas[i]:[bgAlphas[i]]);
 					bgTextures[i] = statusbg;
 				}
 			}
-			
-			__weakMap.set("bgTextures" + uid, bgTextures);
 			
 			btnBackgroundContainer = PoolBase.getInstanceByType(InteractiveUiBase);
 			addChild(btnBackgroundContainer);
@@ -112,13 +118,11 @@ package cn.royan.fl.uis.bases
 			btnLabelText.setText(btnLabel);
 			btnLabelText.setSize(containerWidth, containerHeight);
 			addChild(btnLabelText);
-			
-			__weakMap.set("btnLabelText" + uid, btnLabelText);
 		}
 		
 		override protected function mouseClickHandler(evt:MouseEvent):void
 		{
-			if( !isInGroup ){
+			if( isInGroup ){
 				selected = !selected;
 				status = selected?SELECTED:status;
 				
@@ -130,12 +134,12 @@ package cn.royan.fl.uis.bases
 		
 		override public function getDefaultBackgroundColors():Array
 		{
-			return [0xFFFFFF,0x00ff64,0x00c850,0xe9f48e,0xa2a29e];
+			return [[0xFFFFFF,0x00ff64],[0x00ff64,0x00c850],[0x00c850,0xe9f48e],[0xe9f48e,0xa2a29e],[0xa2a29e,0xFFFFFF]];
 		}
 		
 		override public function getDefaultBackgroundAlphas():Array
 		{
-			return [1,1,1,1,1];
+			return [[1,1],[1,1],[1,1],[1,1],[1,1]];
 		}
 		
 		override public function setSize(cWidth:int, cHeight:int):void
@@ -144,13 +148,13 @@ package cn.royan.fl.uis.bases
 			for each( var io:UninteractiveUiBase in bgTextures ){
 				io.setSize(cWidth, cHeight);
 			}
-			btnLabelText.setSize(cWidth, cHeight);
+			if( btnLabelText ) btnLabelText.setSize(cWidth, cHeight);
 		}
 		
 		override public function setEnabled(value:Boolean):void
 		{
 			super.setEnabled(value);
-			btnLabelText.setEnabled(value);
+			if( btnLabelText ) btnLabelText.setEnabled(value);
 		}
 		
 		public function setSelected(value:Boolean):void
@@ -165,6 +169,20 @@ package cn.royan.fl.uis.bases
 			return selected;
 		}
 		
+		override public function setTexture(value:BitmapData, frames:uint=5):void
+		{
+			if( value ){
+				type = 1;
+				statusLen = frames;
+			}
+			
+			bgTexture = value;
+			
+			initBackground();
+			
+			draw();
+		}
+		
 		public function getText():String
 		{
 			return btnLabelText.getText();
@@ -172,12 +190,12 @@ package cn.royan.fl.uis.bases
 		
 		public function setText(value:String):void
 		{
-			btnLabelText.setText(value);
+			if( btnLabelText ) btnLabelText.setText(value);
 		}
 		
 		public function setFormat(format:TextFormat):void
 		{
-			btnLabelText.setFormat(format);
+			if( btnLabelText ) btnLabelText.setFormat(format);
 		}
 		
 		public function getFormat():TextFormat
@@ -192,14 +210,10 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( __weakMap.getValue("bgTexture" + uid) ){
-				bgTexture.dispose();
-				PoolBase.disposeInstance(bgTexture);
-				__weakMap.clear("bgTexture" + uid);
-			}
+			super.dispose();
 			
 			var i:int = 0;
-			var len:int = __weakMap.getValue("bgTextures" + uid)?bgTextures.length:0;
+			var len:int = bgTextures?bgTextures.length:0;
 			for( i; i < len; i++ ){
 				if( bgTextures[i] ){
 					bgTextures[i].dispose();
@@ -209,14 +223,7 @@ package cn.royan.fl.uis.bases
 				delete bgTextures[i];
 			}
 			
-			__weakMap.clear("bgTextures" + uid);
-			__weakMap.clear("btnLabelText" + uid);
-			
 			PoolBase.disposeInstance(btnLabelText);
-			
-			bgTextures = null;
-			bgColors = null;
-			bgAlphas = null;
 		}
 	}
 }

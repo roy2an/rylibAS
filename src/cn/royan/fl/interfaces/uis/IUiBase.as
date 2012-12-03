@@ -18,7 +18,7 @@ package cn.royan.fl.interfaces.uis
 		function getSize():Array;
 		function setPosition(cX:int, cY:int):void;
 		function getPosition():Array;
-		function setTexture(value:BitmapData):void;
+		function setTexture(value:BitmapData, frames:uint=1):void;
 		function getTexture():BitmapData;
 		function getDispatcher():EventDispatcher;
 //		function setEnabled(value:Boolean):void;

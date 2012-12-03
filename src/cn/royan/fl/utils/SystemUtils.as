@@ -50,7 +50,10 @@ package cn.royan.fl.utils
 		public static function getInstanceByClassName(className:String, ...parameters):*
 		{
 			var InstanceClass:Class = getDefinitionByName(className) as Class;
-			return PoolBase.getInstanceByType( InstanceClass, parameters );
+			if( parameters.length )
+				return PoolBase.getInstanceByType( InstanceClass, parameters );
+			
+			return PoolBase.getInstanceByType(InstanceClass);
 		}
 		
 		public static function copyToClipboard(value:String):void

@@ -38,6 +38,11 @@ package cn.royan.fl.services
 			urlrequest.method = extra == URLRequestMethod.POST?extra:URLRequestMethod.GET;
 		}
 		
+		public function setCallbacks(value:Object):void
+		{
+			
+		}
+		
 		public function connect():void
 		{
 			

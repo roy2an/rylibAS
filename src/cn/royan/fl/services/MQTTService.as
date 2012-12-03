@@ -102,6 +102,11 @@ package cn.royan.fl.services
 			}
 		}
 		
+		public function setCallbacks(value:Object):void
+		{
+			
+		}
+		
 		public function connect():void
 		{
 			socket = new Socket(host, port);

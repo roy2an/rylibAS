@@ -6,6 +6,7 @@ package cn.royan.fl.interfaces.uis
 	{
 		function setText(value:String):void;
 		function getText():String;
+		function setEmbedFont(value:Boolean):void;
 		function setFormat(value:TextFormat):void;
 		function getFormat():TextFormat;
 		function getDefaultFormat():TextFormat;

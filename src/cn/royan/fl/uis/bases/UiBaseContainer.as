@@ -1,9 +1,9 @@
 package cn.royan.fl.uis.bases
 {
-	import flash.display.DisplayObject;
-	
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
+	
+	import flash.display.DisplayObject;
 	
 	public class UiBaseContainer extends InteractiveUiBase
 	{
@@ -18,6 +18,8 @@ package cn.royan.fl.uis.bases
 		protected var items:Vector.<IUiBase>;
 		protected var horizontalAlign:uint;
 		protected var verticalAlign:uint;
+		protected var gaps:Object;
+		protected var margins:Object;
 		
 		public function UiBaseContainer()
 		{
@@ -27,8 +29,6 @@ package cn.royan.fl.uis.bases
 		public function addItem(item:IUiBase):void
 		{
 			items.push(item);
-			
-			__weakMap.set("items" + uid + "_" + (items.length - 1), item);
 			
 			addChild(item as DisplayObject);
 			draw();
@@ -56,38 +56,52 @@ package cn.royan.fl.uis.bases
 			return items.indexOf(item);
 		}
 		
+		public function getItemByIndex(index:uint):IUiBase
+		{
+			return items[index];
+		}
+		
+		public function setGaps(gapX:int, gapY:int):void
+		{
+			gaps = {x:gapX, y:gapY};
+		}
+		
+		public function setMargin(left:int, top:int, right:int, bottom:int):void
+		{
+			margins = {l:left,t:top,r:right,b:bottom};
+		}
+		
 		override public function draw():void
 		{
-			var offsetX:int = 0;
-			var offsetY:int = 0;
+			var offsetX:int = margins?margins['l']:0;
+			var offsetY:int = margins?margins['t']:0;
 			var lineHeight:int = 0;
 			
 			for each(var item:IUiBase in items)
 			{
 				var size:Array = item.getSize();
 				
-				if( size[0] + offsetX > getSize()[0] )
+				if( size[0] + offsetX + (gaps?gaps['x']:0) > getSize()[0] )
 				{
-					offsetX = 0;
-					offsetY += lineHeight;
+					offsetX = margins?margins['l']:0;
+					offsetY += lineHeight + (gaps?gaps['y']:0);
 				}
 				
 				item.setPosition(offsetX, offsetY);
 				
-				offsetX += item.getSize()[0];
+				offsetX += item.getSize()[0] + (gaps?gaps['x']:0);
 				lineHeight = Math.max(item.getSize()[1], lineHeight);
 			}
 		}
 		
 		override public function dispose():void
 		{
+			super.dispose();
+			
 			var i:int = 0;
 			var len:int = items.length;
 			for( i; i < len; i++ ){
-				__weakMap.clear("items" + uid + "_" + i);
-				
 				items[i].dispose();
-				items[i] = null;
 				delete items[i];
 			}
 			

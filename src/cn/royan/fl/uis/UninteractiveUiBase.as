@@ -1,27 +1,31 @@
 package cn.royan.fl.uis
 {
+	import cn.royan.fl.bases.PoolBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.BitmapData;
+	import flash.display.GradientType;
 	import flash.display.Shape;
 	import flash.events.EventDispatcher;
+	import flash.geom.Matrix;
 
 	public class UninteractiveUiBase extends Shape implements IUiBase
 	{
-		protected static var __weakMap:WeakMap = WeakMap.getInstance();
-		
 		protected var uid:uint;
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
 		protected var bgTexture:BitmapData;
 		protected var containerWidth:Number;
 		protected var containerHeight:Number;
+		protected var matrix:Matrix;
 		
 		public function UninteractiveUiBase(texture:BitmapData = null)
 		{
 			super();
+			
+			cacheAsBitmap = true;
 			
 			uid = SystemUtils.createObjectUID();
 			
@@ -30,7 +34,7 @@ package cn.royan.fl.uis
 			
 			if( texture ){
 				bgTexture = texture;
-				__weakMap.set("bgTexture" + uid, bgTexture);
+				setSize(bgTexture.width, bgTexture.height);
 			}
 			
 		}
@@ -39,12 +43,15 @@ package cn.royan.fl.uis
 		{
 			graphics.clear();
 			if( containerWidth && containerHeight ){
-				if( __weakMap.getValue("bgTexture" + uid) ){
+				if( bgTexture ){
 					graphics.beginBitmapFill(bgTexture);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}else if(  bgAlphas && bgAlphas.length > 1 ){
-					throw new Error("no implements");
+					matrix.createGradientBox(containerWidth, containerHeight, Math.PI / 2, 0, 0);
+					graphics.beginGradientFill(GradientType.LINEAR, bgColors, bgAlphas, [0,255], matrix);
+					graphics.drawRect( 0, 0, containerWidth, containerHeight );
+					graphics.endFill();
 				}else if(  bgAlphas && bgAlphas.length > 0 && bgAlphas[0] > 0 ){
 					graphics.beginFill( bgColors[0], bgAlphas[0] );
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
@@ -55,17 +62,25 @@ package cn.royan.fl.uis
 		
 		public function getDefaultBackgroundColors():Array
 		{
-			return [0xFFFFFF];
+			return [0xFF0000,0x00FF00];
 		}
 		
 		public function getDefaultBackgroundAlphas():Array
 		{
-			return [1];
+			return [1,1];
 		}
 		
 		public function setBackgroundColors(value:Array):void
 		{
 			bgColors = value;
+			
+			if( bgColors.length > 1 ){
+				if( matrix )
+					PoolBase.disposeInstance(matrix);
+				
+				matrix = PoolBase.getInstanceByType(Matrix);
+			}
+			
 			draw();
 		}
 		
@@ -77,6 +92,14 @@ package cn.royan.fl.uis
 		public function setBackgroundAlphas(value:Array):void
 		{
 			bgAlphas = value;
+			
+			if( bgAlphas.length > 1 ){
+				if( matrix )
+					PoolBase.disposeInstance(matrix);
+				
+				matrix = PoolBase.getInstanceByType(Matrix);
+			}
+			
 			draw();
 		}
 		
@@ -108,10 +131,11 @@ package cn.royan.fl.uis
 			return [x,y];
 		}
 		
-		public function setTexture(value:BitmapData):void
+		public function setTexture(value:BitmapData, frames:uint=1):void
 		{
 			bgTexture = value;
-			__weakMap.set("bgTexture"+uid, bgTexture);
+			
+			setSize( value.width, value.height );
 			
 			draw();
 		}
@@ -125,20 +149,17 @@ package cn.royan.fl.uis
 		{
 			return null;
 		}
-//		
-//		final public function setEnabled(value:Boolean):void
-//		{
-//			
-//		}
 		
 		public function dispose():void
 		{
-			if( __weakMap.getValue("bgTexture" + uid) ){
+			if( bgTexture ){
 				bgTexture.dispose();
-				__weakMap.clear("bgTexture" + uid);
+				PoolBase.disposeInstance(bgTexture);
 			}
 				
-			bgTexture = null;
+			if( matrix )
+				PoolBase.disposeInstance(matrix);
+			
 			bgColors = null;
 			bgAlphas = null;
 		}

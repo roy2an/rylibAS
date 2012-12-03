@@ -25,9 +25,6 @@ package cn.royan.fl.uis.bases
 			
 			inputText.defaultTextFormat = getDefaultFormat();
 			
-			__weakMap.set("inputText" + uid, inputText);
-			__weakMap.set("defaultFormat" + uid, defaultFormat);
-			
 			addChild(inputText);
 		}
 		
@@ -62,6 +59,11 @@ package cn.royan.fl.uis.bases
 			inputText.text = value;
 		}
 		
+		public function setEmbedFont(value:Boolean):void
+		{
+			inputText.embedFonts = value;
+		}
+		
 		override public function draw():void
 		{
 			inputText.text = text;
@@ -71,17 +73,13 @@ package cn.royan.fl.uis.bases
 		
 		override public function dispose():void
 		{
-			if( __weakMap.getValue("inputText" + uid) ){
-				__weakMap.clear("inputText" + uid);
-				
+			super.dispose();
+			
+			if( inputText )
 				PoolBase.disposeInstance(inputText);
-			}
 				
-			if( __weakMap.getValue("defaultFormat" + uid) ){
-				__weakMap.clear("defaultFormat" + uid);
-				
+			if( defaultFormat )
 				PoolBase.disposeInstance(defaultFormat);
-			}
 		}
 	}
 }

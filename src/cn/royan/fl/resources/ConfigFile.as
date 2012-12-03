@@ -1,12 +1,16 @@
 package cn.royan.fl.resources
 {
+	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
+	import flash.net.URLVariables;
+	import flash.system.System;
 	import flash.utils.describeType;
 	import flash.xml.XMLDocument;
 	import flash.xml.XMLNode;
 
-	public class ConfigFile
+	public class ConfigFile implements IDisposeBase
 	{
 		public static const CONFIG_FILE_TYPE_JSON:uint = 0;
 		public static const CONFIG_FILE_TYPE_XML:uint = 1;
@@ -15,19 +19,19 @@ package cn.royan.fl.resources
 		protected var type:uint;
 		protected var configData:Object;
 		
-		public function ConfigFile(data:*, type:uint = CONFIG_FILE_TYPE_JSON)
+		public function ConfigFile(data:String, type:uint = CONFIG_FILE_TYPE_JSON)
 		{
+			this.type = type;
 			configData = new Object();
-			configData['CODE_ID'] = 'test';
 			switch(type){
 				case ConfigFile.CONFIG_FILE_TYPE_JSON:
-					
+					parseJsonToObject(data);
 					break;
 				case ConfigFile.CONFIG_FILE_TYPE_XML:
 					parseXMLToObject(data);
 					break;
 				case ConfigFile.CONFIG_FILE_TYPE_TEXT:
-					
+					parseTxtToObject(data);
 					break;
 			}
 		}
@@ -37,20 +41,38 @@ package cn.royan.fl.resources
 			return configData;
 		}
 		
-		protected function parseXMLToObject(data:*):void
+		public function dispose():void
+		{
+			configData = null;
+		}
+		
+		protected function parseJsonToObject(data:String):void
+		{
+			
+		}
+		
+		protected function parseXMLToObject(data:String):void
 		{
 			try{
 				var xml:XML = new XML(data);
+				SystemUtils.print("[Class ConfigFile]:XML To Object");
 				
-				SystemUtils.print("[Class ConfigFile]:XML");
+				System.disposeXML(xml);
 			}catch(e:Error){
-				var xmlDoc:XMLDocument = new XMLDocument();
+				var xmlDoc:XMLDocument = PoolBase.getInstanceByType(XMLDocument);
 					xmlDoc.ignoreWhite = true;
 					xmlDoc.parseXML(data);
 				
 				parseXMLNodeToObject(xmlDoc, configData);
-				SystemUtils.print("[Class ConfigFile]:XMLDocument");
+				SystemUtils.print("[Class ConfigFile]:XMLDocument To Object");
+				//PoolBase.disposeInstance(xmlDoc);
+				xmlDoc = null;
 			}
+		}
+		
+		protected function parseXMLListToObject(xmlList:XMLList, parent:Object):void
+		{
+			
 		}
 		
 		protected function parseXMLNodeToObject(xmlNode:XMLNode, parent:Object):void
@@ -60,7 +82,6 @@ package cn.royan.fl.resources
 			var len:int = nodes.length;
 			for(i = 0; i < len; i++){
 				var child:Object = new Object();
-					child['CODE_ID'] = parent['CODE_ID']+"_"+i;
 				
 				if( !parent[nodes[i].nodeName] ){
 					parent[nodes[i].nodeName] = child;
@@ -80,6 +101,17 @@ package cn.royan.fl.resources
 				{
 					child[prop] = nodes[i].attributes[prop];
 				}
+			}
+		}
+		
+		protected function parseTxtToObject(txt:String):void
+		{
+			var valuePair:Array = txt.split("&");
+			var i:int;
+			var len:int = valuePair.length;
+			for( i = 0; i < len; i++){
+				var pair:Array = valuePair[i].split("=");
+				configData[pair[0]] = pair[1];
 			}
 		}
 		
