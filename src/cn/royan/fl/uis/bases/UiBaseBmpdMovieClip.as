@@ -1,6 +1,6 @@
 package cn.royan.fl.uis.bases
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
@@ -44,10 +44,10 @@ package cn.royan.fl.uis.bases
 			
 			var i:int;
 			var frameunit:UninteractiveUiBase;
-			var rectangle:Rectangle = PoolBase.getInstanceByType(Rectangle);
+			var rectangle:Rectangle = PoolMap.getInstanceByType(Rectangle);
 				rectangle.width = frameWidth;
 				rectangle.height = frameHeight;
-			var point:Point = PoolBase.getInstanceByType(Point);
+			var point:Point = PoolMap.getInstanceByType(Point);
 			for(i = 0; i < frames; i++){
 				var curRow:int = i % row;
 				var curCol:int = i / row;
@@ -56,18 +56,18 @@ package cn.royan.fl.uis.bases
 				rectangle.x = curRow * frameWidth;
 				rectangle.y = curCol * frameHeight
 				
-				bmpd = PoolBase.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
+				bmpd = PoolMap.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
 				bmpd.copyPixels( bgTexture, rectangle, point );
-				frameunit = PoolBase.getInstanceByType(UninteractiveUiBase);
+				frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
 				frameunit.setTexture(bmpd);
 				
 				bgTextures[i] = frameunit;
 			}
 			
-			PoolBase.disposeInstance(rectangle);
-			PoolBase.disposeInstance(point);
+			PoolMap.disposeInstance(rectangle);
+			PoolMap.disposeInstance(point);
 			
-			timer = PoolBase.getInstanceByType(Timer, 1000 / rate);
+			timer = PoolMap.getInstanceByType(Timer, 1000 / rate);
 			timer.addEventListener(TimerEvent.TIMER, timerHandler);
 			
 			if( bgTextures[current-1] )
@@ -156,14 +156,14 @@ package cn.royan.fl.uis.bases
 			for( i; i < len; i++ ){
 				if( bgTextures[i] ){
 					bgTextures[i].dispose();
-					PoolBase.disposeInstance(bgTextures[i]);
+					PoolMap.disposeInstance(bgTextures[i]);
 				}
 				
 				delete bgTextures[i];
 			}
 			
 			if( timer )
-				PoolBase.disposeInstance(timer);
+				PoolMap.disposeInstance(timer);
 		}
 		
 		override protected function removeFromStageHandler(evt:Event):void

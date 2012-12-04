@@ -1,6 +1,6 @@
 package cn.royan.fl.uis.embeds
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -36,7 +36,7 @@ package cn.royan.fl.uis.embeds
 			
 			if( !bindToFrameRate )
 			{
-				timer = PoolBase.getInstanceByType(Timer, 1000 / rate);
+				timer = PoolMap.getInstanceByType(Timer, 1000 / rate);
 				timer.addEventListener(TimerEvent.TIMER, timerHandler);
 				
 				__weakMap.set("timer" + uid, timer);
@@ -141,7 +141,7 @@ package cn.royan.fl.uis.embeds
 		public function dispose():void
 		{
 			if( __weakMap.getValue("timer" + uid) ){
-				PoolBase.disposeInstance(timer);
+				PoolMap.disposeInstance(timer);
 				__weakMap.clear("timer" + uid);
 			}
 		}

@@ -1,6 +1,6 @@
 package cn.royan.fl.uis
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -35,6 +35,7 @@ package cn.royan.fl.uis
 		protected var containerHeight:Number;
 		protected var matrix:Matrix;
 		protected var isMouseRender:Boolean;
+		protected var callbacks:Object;
 		
 		public function InteractiveUiBase(texture:BitmapData = null)
 		{
@@ -86,31 +87,35 @@ package cn.royan.fl.uis
 		
 		protected function mouseClickHandler(evt:MouseEvent):void
 		{
-			
+			if( callbacks && callbacks["click"] ) callbacks["click"]();
 		}
 		
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
 			if( isMouseRender ) draw();
+			if( callbacks && callbacks["over"] ) callbacks["over"]();
 		}
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:NORMAL;
 			if( isMouseRender ) draw();
+			if( callbacks && callbacks["out"] ) callbacks["out"]();
 		}
 		
 		protected function mouseDownHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:DOWN;
 			if( isMouseRender ) draw();
+			if( callbacks && callbacks["down"] ) callbacks["down"]();
 		}
 		
 		protected function mouseUpHandler(evt:MouseEvent):void
 		{
 			status = selected?SELECTED:OVER;
 			if( isMouseRender ) draw();
+			if( callbacks && callbacks["up"] ) callbacks();
 		}
 		
 		public function draw():void
@@ -153,9 +158,9 @@ package cn.royan.fl.uis
 			
 			if( bgColors.length > 1 ){
 				if( matrix )
-					PoolBase.disposeInstance(matrix);
+					PoolMap.disposeInstance(matrix);
 				
-				matrix = PoolBase.getInstanceByType(Matrix);
+				matrix = PoolMap.getInstanceByType(Matrix);
 			}
 			
 			draw();
@@ -175,9 +180,9 @@ package cn.royan.fl.uis
 			
 			if( bgAlphas.length > 1 ){
 				if( matrix )
-					PoolBase.disposeInstance(matrix);
+					PoolMap.disposeInstance(matrix);
 				
-				matrix = PoolBase.getInstanceByType(Matrix);
+				matrix = PoolMap.getInstanceByType(Matrix);
 			}
 			
 			draw();
@@ -264,6 +269,11 @@ package cn.royan.fl.uis
 			return status;
 		}
 		
+		public function setCallbacks(value:Object):void
+		{
+			callbacks = value;
+		}
+		
 		override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
 		{
 			eventMap[type] = listener;
@@ -282,14 +292,15 @@ package cn.royan.fl.uis
 		{
 			if( bgTexture ){
 				bgTexture.dispose();
-				PoolBase.disposeInstance(bgTexture);
+				PoolMap.disposeInstance(bgTexture);
 			}
 			
 			if( matrix )
-				PoolBase.disposeInstance(matrix);
+				PoolMap.disposeInstance(matrix);
 			
 			bgColors = null;
 			bgAlphas = null;
+			callbacks = null;
 		}
 	}
 }

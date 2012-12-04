@@ -1,6 +1,6 @@
 package cn.royan.fl.resources
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
@@ -59,7 +59,7 @@ package cn.royan.fl.resources
 				
 				System.disposeXML(xml);
 			}catch(e:Error){
-				var xmlDoc:XMLDocument = PoolBase.getInstanceByType(XMLDocument);
+				var xmlDoc:XMLDocument = PoolMap.getInstanceByType(XMLDocument);
 					xmlDoc.ignoreWhite = true;
 					xmlDoc.parseXML(data);
 				

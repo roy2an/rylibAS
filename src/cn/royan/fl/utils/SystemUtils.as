@@ -1,6 +1,6 @@
 package cn.royan.fl.utils
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	
 	import flash.net.LocalConnection;
 	import flash.system.ApplicationDomain;
@@ -51,9 +51,9 @@ package cn.royan.fl.utils
 		{
 			var InstanceClass:Class = getDefinitionByName(className) as Class;
 			if( parameters.length )
-				return PoolBase.getInstanceByType( InstanceClass, parameters );
+				return PoolMap.getInstanceByType( InstanceClass, parameters );
 			
-			return PoolBase.getInstanceByType(InstanceClass);
+			return PoolMap.getInstanceByType(InstanceClass);
 		}
 		
 		public static function copyToClipboard(value:String):void

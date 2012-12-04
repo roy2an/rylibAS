@@ -1,6 +1,6 @@
 package cn.royan.fl.uis
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -76,9 +76,9 @@ package cn.royan.fl.uis
 			
 			if( bgColors.length > 1 ){
 				if( matrix )
-					PoolBase.disposeInstance(matrix);
+					PoolMap.disposeInstance(matrix);
 				
-				matrix = PoolBase.getInstanceByType(Matrix);
+				matrix = PoolMap.getInstanceByType(Matrix);
 			}
 			
 			draw();
@@ -95,9 +95,9 @@ package cn.royan.fl.uis
 			
 			if( bgAlphas.length > 1 ){
 				if( matrix )
-					PoolBase.disposeInstance(matrix);
+					PoolMap.disposeInstance(matrix);
 				
-				matrix = PoolBase.getInstanceByType(Matrix);
+				matrix = PoolMap.getInstanceByType(Matrix);
 			}
 			
 			draw();
@@ -154,11 +154,11 @@ package cn.royan.fl.uis
 		{
 			if( bgTexture ){
 				bgTexture.dispose();
-				PoolBase.disposeInstance(bgTexture);
+				PoolMap.disposeInstance(bgTexture);
 			}
 				
 			if( matrix )
-				PoolBase.disposeInstance(matrix);
+				PoolMap.disposeInstance(matrix);
 			
 			bgColors = null;
 			bgAlphas = null;

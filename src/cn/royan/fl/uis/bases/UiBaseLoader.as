@@ -1,6 +1,6 @@
 package cn.royan.fl.uis.bases
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
@@ -25,17 +25,17 @@ package cn.royan.fl.uis.bases
 			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
 			loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
 			
-			progressTxt = PoolBase.getInstanceByType(UiBaseText);
+			progressTxt = PoolMap.getInstanceByType(UiBaseText);
 			progressTxt.setText("0%");
 			progressTxt.setSize(50, 20);
 			addChild(progressTxt);
 			
-			progressBar = PoolBase.getInstanceByType(UninteractiveUiBase);
+			progressBar = PoolMap.getInstanceByType(UninteractiveUiBase);
 			progressBar.setBackgroundColors([0xFF0000]);
 			progressBar.setSize(100, 10);
 			addChild(progressBar);
 			
-			currentFileName = PoolBase.getInstanceByType(UiBaseText);
+			currentFileName = PoolMap.getInstanceByType(UiBaseText);
 			currentFileName.setSize(100, 20);
 			addChild(currentFileName);
 		}
@@ -61,16 +61,16 @@ package cn.royan.fl.uis.bases
 			super.dispose();
 			
 			if( loaderData )
-				PoolBase.disposeInstance(loaderData);
+				PoolMap.disposeInstance(loaderData);
 			
 			if( progressTxt )
-				PoolBase.disposeInstance(progressTxt);
+				PoolMap.disposeInstance(progressTxt);
 			
 			if( progressBar )
-				PoolBase.disposeInstance(progressBar);
+				PoolMap.disposeInstance(progressBar);
 			
 			if( currentFileName )
-				PoolBase.disposeInstance(currentFileName);
+				PoolMap.disposeInstance(currentFileName);
 			
 		}
 	}

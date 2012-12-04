@@ -1,6 +1,6 @@
 package cn.royan.fl.resources
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.IDisposeBase;
@@ -48,7 +48,7 @@ package cn.royan.fl.resources
 			
 			stageView = container;
 			
-			takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
+			takeService = PoolMap.getInstanceByType( TakeService, "version="+moduleVer );
 			takeService.setCallbacks({done:configFileOnCompleteHandler,
 									  doing:configFileOnProgressHandler,
 									  error:configFileOnErrorHandler});
@@ -63,7 +63,7 @@ package cn.royan.fl.resources
 		
 		public function dispose():void
 		{
-			PoolBase.disposeInstance(configFile);
+			PoolMap.disposeInstance(configFile);
 			callbacks = null;
 		}
 		
@@ -93,11 +93,11 @@ package cn.royan.fl.resources
 			
 			__weakMap.set(currentPath + uid, data);
 			
-			configFile = PoolBase.getInstanceByType(ConfigFile, data, configType);
+			configFile = PoolMap.getInstanceByType(ConfigFile, data, configType);
 			
 			takeService.dispose();
 			
-			PoolBase.disposeInstance(takeService);
+			PoolMap.disposeInstance(takeService);
 			
 			synFileStartLoadHandler();
 		}
@@ -124,7 +124,7 @@ package cn.royan.fl.resources
 				
 				SystemUtils.print("[Class ResourceLoader]:syn File Start:"+currentPath);
 				
-				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
+				takeService = PoolMap.getInstanceByType( TakeService, "version="+moduleVer );
 				takeService.setCallbacks({done:synFileOnCompleteHandler,
 										  doing:synFileOnProgressHandler,
 					 					  error:synFileOnErrorHandler});
@@ -152,7 +152,7 @@ package cn.royan.fl.resources
 			__weakMap.set(currentPath + uid, data);
 			
 			takeService.dispose();
-			PoolBase.disposeInstance(takeService);
+			PoolMap.disposeInstance(takeService);
 			
 			synFileStartLoadHandler();
 		}
@@ -178,7 +178,7 @@ package cn.royan.fl.resources
 				
 				SystemUtils.print("[Class ResourceLoader]:asyn File Start:"+currentPath);
 				
-				takeService = PoolBase.getInstanceByType( TakeService, "version="+moduleVer );
+				takeService = PoolMap.getInstanceByType( TakeService, "version="+moduleVer );
 				takeService.setCallbacks({done:asynFileOnCompleteHandler,
 										  doing:asynFileOnProgressHandler,
 										  error:asynFileOnErrorHandler});
@@ -202,7 +202,7 @@ package cn.royan.fl.resources
 			__weakMap.set(currentPath + uid, data);
 			
 			takeService.dispose();
-			PoolBase.disposeInstance(takeService);
+			PoolMap.disposeInstance(takeService);
 			
 			asynFileStartLoadHandler();
 		}

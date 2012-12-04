@@ -1,6 +1,6 @@
 package cn.royan.fl.services
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
@@ -43,7 +43,7 @@ package cn.royan.fl.services
 			
 			uid = SystemUtils.createObjectUID();
 			
-			timer = PoolBase.getInstanceByType(Timer, keepalive / 2 * 1000);
+			timer = PoolMap.getInstanceByType(Timer, keepalive / 2 * 1000);
 			timer.addEventListener(TimerEvent.TIMER, pingHandler);
 			
 			__weakMap.set("timer" + uid, timer);
@@ -55,7 +55,7 @@ package cn.royan.fl.services
 				case "publish":
 					if( extra.topic && extra.content )
 					{
-						var bytes:ByteArray = PoolBase.getInstanceByType(ByteArray);
+						var bytes:ByteArray = PoolMap.getInstanceByType(ByteArray);
 						writeString(bytes, extra.topic);
 						
 						if( extra.qos )
@@ -70,7 +70,7 @@ package cn.royan.fl.services
 						var messageType:int = MQTTMessage.PUBLISH;
 						if( extra.qos ) messageType += extra.qos << 1;
 						if( extra.retain ) messageType += 1;
-						var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+						var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
 							mqttBytes.writeMessageType(messageType);
 							mqttBytes.writeMessageValue(bytes);
 						
@@ -80,8 +80,8 @@ package cn.royan.fl.services
 						bytes.length = 0;
 						mqttBytes.length = 0;
 						
-						PoolBase.disposeInstance(bytes);
-						PoolBase.disposeInstance(mqttBytes);
+						PoolMap.disposeInstance(bytes);
+						PoolMap.disposeInstance(mqttBytes);
 						
 						SystemUtils.print( "[Class MQTTService]:Publish sent" );
 					}
@@ -119,7 +119,7 @@ package cn.royan.fl.services
 		
 		public function close():void
 		{
-			var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+			var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
 			mqttBytes.writeMessageType(MQTTMessage.DISCONNECT);
 				
 			socket.writeBytes(mqttBytes);
@@ -127,7 +127,7 @@ package cn.royan.fl.services
 			
 			mqttBytes.length = 0;
 			
-			PoolBase.disposeInstance(mqttBytes);
+			PoolMap.disposeInstance(mqttBytes);
 			
 			socket.close();
 			servicing = false;
@@ -137,7 +137,7 @@ package cn.royan.fl.services
 		public function dispose():void
 		{
 			if( __weakMap.getValue("timer"+uid) ){
-				PoolBase.disposeInstance(timer);
+				PoolMap.disposeInstance(timer);
 				__weakMap.clear("timer"+uid);
 			}
 		}
@@ -154,7 +154,7 @@ package cn.royan.fl.services
 		
 		protected function connectHandler(event:Event):void
 		{
-			var bytes:ByteArray = PoolBase.getInstanceByType(ByteArray);
+			var bytes:ByteArray = PoolMap.getInstanceByType(ByteArray);
 				bytes.writeByte(0x00); //0
 				bytes.writeByte(0x06); //6
 				bytes.writeByte(0x4d); //M
@@ -180,7 +180,7 @@ package cn.royan.fl.services
 			writeString(bytes, clientid);
 			writeString(bytes, username?username:"");
 			writeString(bytes, password?password:"");
-			var mqttBytes:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+			var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
 				mqttBytes.writeMessageType(MQTTMessage.CONNECT);
 				mqttBytes.writeMessageValue(bytes);
 			
@@ -190,8 +190,8 @@ package cn.royan.fl.services
 			bytes.length = 0;
 			mqttBytes.length = 0;
 			
-			PoolBase.disposeInstance(bytes);
-			PoolBase.disposeInstance(mqttBytes);
+			PoolMap.disposeInstance(bytes);
+			PoolMap.disposeInstance(mqttBytes);
 		}
 		
 		protected function ioerrorHandler(event:IOErrorEvent):void
@@ -203,7 +203,7 @@ package cn.royan.fl.services
 		protected function socketdataHandler(event:ProgressEvent):void
 		{
 			SystemUtils.print( "[Class MQTTService]:Socket received " + socket.bytesAvailable + " byte(s) of data:");
-			var result:MQTTMessage = PoolBase.getInstanceByType(MQTTMessage);
+			var result:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
 			socket.readBytes(result);
 			
 			switch(result.readUnsignedByte()){

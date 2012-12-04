@@ -1,7 +1,7 @@
 package cn.royan.fl.uis.bases
 {
 	
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.uis.IUiTextBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
@@ -18,13 +18,13 @@ package cn.royan.fl.uis.bases
 		public function UiBaseText(label:String='')
 		{
 			text = label;
-			inputText = PoolBase.getInstanceByType(TextField);
-			
+			inputText = PoolMap.getInstanceByType(TextField);
+			inputText.text = text;
 			inputText.mouseEnabled 	= false;
 			inputText.selectable 	= false;
-			
 			inputText.defaultTextFormat = getDefaultFormat();
 			
+			setSize(100, 20);
 			addChild(inputText);
 		}
 		
@@ -41,7 +41,7 @@ package cn.royan.fl.uis.bases
 		public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){
-				defaultFormat = PoolBase.getInstanceByType(TextFormat);
+				defaultFormat = PoolMap.getInstanceByType(TextFormat);
 				defaultFormat.align = TextFormatAlign.CENTER;
 				defaultFormat.size = 14;
 			}
@@ -59,6 +59,32 @@ package cn.royan.fl.uis.bases
 			inputText.text = value;
 		}
 		
+		public function appendText(value:String):void
+		{
+			inputText.appendText(value);
+		}
+		
+		public function setHTMLText(value:String):void
+		{
+			inputText.htmlText = value;
+		}
+		
+		public function getHTMLText():String
+		{
+			return inputText.htmlText;
+		}
+		
+		public function appendHTMLText(value:String):void
+		{
+			inputText.htmlText += value;
+		}
+		
+		public function setMultiLine(value:Boolean):void
+		{
+			inputText.multiline = value;
+			inputText.wordWrap = value;
+		}
+		
 		public function setEmbedFont(value:Boolean):void
 		{
 			inputText.embedFonts = value;
@@ -66,7 +92,6 @@ package cn.royan.fl.uis.bases
 		
 		override public function draw():void
 		{
-			inputText.text = text;
 			inputText.width = containerWidth;
 			inputText.height= containerHeight;
 		}
@@ -76,10 +101,10 @@ package cn.royan.fl.uis.bases
 			super.dispose();
 			
 			if( inputText )
-				PoolBase.disposeInstance(inputText);
+				PoolMap.disposeInstance(inputText);
 				
 			if( defaultFormat )
-				PoolBase.disposeInstance(defaultFormat);
+				PoolMap.disposeInstance(defaultFormat);
 		}
 	}
 }

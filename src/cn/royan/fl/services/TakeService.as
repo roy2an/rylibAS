@@ -1,6 +1,6 @@
 package cn.royan.fl.services
 {
-	import cn.royan.fl.bases.PoolBase;
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -67,7 +67,7 @@ package cn.royan.fl.services
 			if( serviceData ) serviceData.clear();
 			else serviceData = new ByteArray();
 			
-			urlstream = PoolBase.getInstanceByType(URLStream);
+			urlstream = PoolMap.getInstanceByType(URLStream);
 			urlstream.addEventListener(Event.COMPLETE, onComplete);
 			urlstream.addEventListener(ProgressEvent.PROGRESS, onProgress);
 			urlstream.addEventListener(IOErrorEvent.IO_ERROR, onError);
@@ -89,7 +89,7 @@ package cn.royan.fl.services
 			urlstream.removeEventListener(IOErrorEvent.IO_ERROR, onError);
 			urlstream.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
-			PoolBase.disposeInstance(urlstream);
+			PoolMap.disposeInstance(urlstream);
 			
 			serviceData.length = 0;
 			serviceData = null;
@@ -123,11 +123,11 @@ package cn.royan.fl.services
 			switch( format ){
 				case "CWS":
 				case "FWS":
-					var loader:Loader = PoolBase.getInstanceByType(Loader);
+					var loader:Loader = PoolMap.getInstanceByType(Loader);
 					loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
 //					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
 					if( callbacks && callbacks['done'] ) callbacks['done'](loader);
-					PoolBase.disposeInstance(loader);
+					PoolMap.disposeInstance(loader);
 					return;
 					break;
 			}

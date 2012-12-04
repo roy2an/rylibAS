@@ -7,7 +7,7 @@ package cn.royan.fl.bases
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 
-	public class PoolBase
+	public class PoolMap
 	{
 		public static var maxValue:uint = 10;
 		
@@ -31,6 +31,8 @@ package cn.royan.fl.bases
 		
 		public static function getInstanceByType( type:Class, ...parameters ):*
 		{
+			if( parameters.length == 1 && parameters[0] is Array )
+				return createInstanceByType( type, parameters[0] );
 			if( parameters.length > 0 )
 				return createInstanceByType( type, parameters );
 			
