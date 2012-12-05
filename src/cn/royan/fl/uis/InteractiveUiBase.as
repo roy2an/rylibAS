@@ -29,13 +29,15 @@ package cn.royan.fl.uis
 		
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
-		protected var eventMap:Dictionary;
 		protected var bgTexture:BitmapData;
 		protected var containerWidth:Number;
 		protected var containerHeight:Number;
 		protected var matrix:Matrix;
 		protected var isMouseRender:Boolean;
 		protected var callbacks:Object;
+		
+		protected var evtListenerType:Array;
+		protected var evtListenerDirectory:Array
 		
 		public function InteractiveUiBase(texture:BitmapData = null)
 		{
@@ -52,8 +54,6 @@ package cn.royan.fl.uis
 				bgTexture = texture;
 				setSize(bgTexture.width, bgTexture.height);
 			}
-			
-			eventMap = new Dictionary(true);
 			
 			if( stage ) addToStageHandler();
 			else addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
@@ -77,12 +77,9 @@ package cn.royan.fl.uis
 		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-			for( var type:String in eventMap )
-			{
-				removeEventListener( type, eventMap[type] );
-				eventMap[type] = null;
-				delete eventMap[type];
-			}
+			removeAllEventListener();
+			
+			addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
 		}
 		
 		protected function mouseClickHandler(evt:MouseEvent):void
@@ -92,28 +89,28 @@ package cn.royan.fl.uis
 		
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
-			status = selected?SELECTED:OVER;
+			if( mouseEnabled ) status = selected?SELECTED:OVER;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["over"] ) callbacks["over"]();
 		}
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
-			status = selected?SELECTED:NORMAL;
+			if( mouseEnabled ) status = selected?SELECTED:NORMAL;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["out"] ) callbacks["out"]();
 		}
 		
 		protected function mouseDownHandler(evt:MouseEvent):void
 		{
-			status = selected?SELECTED:DOWN;
+			if( mouseEnabled ) status = selected?SELECTED:DOWN;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["down"] ) callbacks["down"]();
 		}
 		
 		protected function mouseUpHandler(evt:MouseEvent):void
 		{
-			status = selected?SELECTED:OVER;
+			if( mouseEnabled ) status = selected?SELECTED:OVER;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["up"] ) callbacks();
 		}
@@ -197,6 +194,7 @@ package cn.royan.fl.uis
 		{
 			containerWidth = cWidth;
 			containerHeight= cHeight;
+			
 			draw();
 		}
 		
@@ -209,6 +207,7 @@ package cn.royan.fl.uis
 		{
 			x = cX;
 			y = cY;
+			
 			draw();
 		}
 		
@@ -241,26 +240,10 @@ package cn.royan.fl.uis
 		
 		public function setEnabled(value:Boolean):void
 		{
-			status = value?status:DISABLE;
 			mouseEnabled = value;
 			mouseChildren = value;
 			
-			if(value){
-				if( !hasEventListener(MouseEvent.MOUSE_OVER) ) addEventListener(MouseEvent.MOUSE_OVER, mouseOverHandler);
-				if( !hasEventListener(MouseEvent.MOUSE_OUT) ) addEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler);
-				if( !hasEventListener(MouseEvent.MOUSE_DOWN) ) addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
-				if( !hasEventListener(MouseEvent.MOUSE_UP) ) addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
-				
-				if( !hasEventListener(MouseEvent.CLICK) ) addEventListener(MouseEvent.CLICK, mouseClickHandler);
-			}else{
-				if( hasEventListener(MouseEvent.MOUSE_OVER) ) removeEventListener(MouseEvent.MOUSE_OVER, mouseOverHandler);
-				if( hasEventListener(MouseEvent.MOUSE_OUT) ) removeEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler);
-				if( hasEventListener(MouseEvent.MOUSE_DOWN) ) removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
-				if( hasEventListener(MouseEvent.MOUSE_UP) ) removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
-				
-				if( hasEventListener(MouseEvent.CLICK) ) removeEventListener(MouseEvent.CLICK, mouseClickHandler);
-			}
-			
+			status = value?NORMAL:DISABLE;
 			draw();
 		}
 		
@@ -274,18 +257,60 @@ package cn.royan.fl.uis
 			callbacks = value;
 		}
 		
-		override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
+		override public function addEventListener( type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false ):void 
 		{
-			eventMap[type] = listener;
+			if ( evtListenerDirectory == null ) {
+				evtListenerDirectory = [];
+				evtListenerType = [];
+			}
+			var dir:Dictionary = new Dictionary();
+			dir[ type ] = listener;
+			evtListenerDirectory.push( dir );
+			evtListenerType.push( type );
 			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
 		}
 		
-		override public function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
+		override public function removeEventListener( type:String, listener:Function, useCapture:Boolean = false ):void 
 		{
-			eventMap[type] = null;
-			delete eventMap[type];
-			
-			super.removeEventListener(type, listener, useCapture );
+			super.removeEventListener(type, listener, useCapture);
+			if ( evtListenerDirectory != null ) {
+				for ( var i:int = 0; i < evtListenerDirectory.length; i++ ) {
+					var dir:Dictionary = evtListenerDirectory[i];
+					if ( dir[ type ] == null ) {
+						continue;
+					}else {
+						if ( dir[ type ] != listener ) {
+							continue
+						}else {
+							evtListenerType.splice( i, 1 );
+							evtListenerDirectory.splice( i, 1 );
+							delete dir[ type ];
+							dir = null;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		public function removeAllEventListener():void
+		{
+			if ( evtListenerType == null || evtListenerType.length == 0)
+				return;
+			for ( var i:int = 0; i < evtListenerType.length; i++)
+			{
+				var type:String = evtListenerType[i];
+				var dic:Dictionary = evtListenerDirectory[i];
+				var fun:Function = dic[ type ];
+				removeEventListener( type, fun );
+			}
+		}
+		
+		public function removeChildren():void
+		{
+			while ( numChildren > 0 ) {
+				removeChildAt( 0 );
+			}
 		}
 		
 		public function dispose():void
