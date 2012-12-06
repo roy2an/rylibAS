@@ -10,6 +10,7 @@ package cn.royan.fl.uis
 	import flash.display.Shape;
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 
 	public class UninteractiveUiBase extends Shape implements IUiBase
 	{
@@ -129,6 +130,16 @@ package cn.royan.fl.uis
 		public function getPosition():Array
 		{
 			return [x,y];
+		}
+		
+		public function setPositionPoint(point:Point):void
+		{
+			setPosition(point.x, point.y);
+		}
+		
+		public function getPositionPoint():Point
+		{
+			return new Point(x, y);
 		}
 		
 		public function setTexture(value:BitmapData, frames:uint=1):void

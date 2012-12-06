@@ -1,7 +1,7 @@
 package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
@@ -12,6 +12,7 @@ package cn.royan.fl.uis
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.utils.Dictionary;
 
 	public class InteractiveUiBase extends Sprite implements IUiBase
@@ -85,6 +86,7 @@ package cn.royan.fl.uis
 		protected function mouseClickHandler(evt:MouseEvent):void
 		{
 			if( callbacks && callbacks["click"] ) callbacks["click"]();
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE));
 		}
 		
 		protected function mouseOverHandler(evt:MouseEvent):void
@@ -216,6 +218,16 @@ package cn.royan.fl.uis
 			return [x,y];
 		}
 		
+		public function setPositionPoint(point:Point):void
+		{
+			setPosition(point.x, point.y);
+		}
+		
+		public function getPositionPoint():Point
+		{
+			return new Point(x, y);
+		}
+		
 		public function setTexture(value:BitmapData, frames:uint=1):void
 		{
 			bgTexture = value;
@@ -306,7 +318,7 @@ package cn.royan.fl.uis
 			}
 		}
 		
-		public function removeChildren():void
+		public function removeAllChildren():void
 		{
 			while ( numChildren > 0 ) {
 				removeChildAt( 0 );

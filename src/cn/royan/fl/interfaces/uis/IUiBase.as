@@ -4,6 +4,7 @@ package cn.royan.fl.interfaces.uis
 	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
+	import flash.geom.Point;
 
 	public interface IUiBase extends IDisposeBase
 	{
@@ -18,6 +19,8 @@ package cn.royan.fl.interfaces.uis
 		function getSize():Array;
 		function setPosition(cX:int, cY:int):void;
 		function getPosition():Array;
+		function setPositionPoint(point:Point):void;
+		function getPositionPoint():Point;
 		function setTexture(value:BitmapData, frames:uint=1):void;
 		function getTexture():BitmapData;
 		function getDispatcher():EventDispatcher;

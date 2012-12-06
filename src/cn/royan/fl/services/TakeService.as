@@ -3,6 +3,7 @@ package cn.royan.fl.services
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
+	import cn.royan.fl.utils.BytesUtils;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.Loader;
@@ -40,8 +41,6 @@ package cn.royan.fl.services
 						urlvariable[key] = param[key];
 					}
 				}
-//			else
-//				urlvariable = new URLVariables();
 		}
 		
 		public function sendRequest(url:String='', extra:*=null):void
@@ -114,47 +113,53 @@ package cn.royan.fl.services
 			
 			urlstream.readBytes(serviceData, 0, urlstream.bytesAvailable);
 			
-			var format:String = String.fromCharCode(serviceData.readByte()) + 
-								String.fromCharCode(serviceData.readByte()) + 
-								String.fromCharCode(serviceData.readByte());
-			
-			serviceData.position = 0;
-			
-			switch( format ){
-				case "CWS":
-				case "FWS":
+			switch( BytesUtils.getType(serviceData) ){
+				case "SWF":
 					var loader:Loader = PoolMap.getInstanceByType(Loader);
-					loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
-//					dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
+						loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
 					if( callbacks && callbacks['done'] ) callbacks['done'](loader);
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
 					PoolMap.disposeInstance(loader);
-					return;
 					break;
+//				case "XML":
+//					break;
+//				case "PNG":
+//					break;
+//				case "JPEG":
+//					break;
+//				case "GIF":
+//					break;
+//				case "BMP":
+//					break;
+//				case "FLV":
+//					break;
+//				case "MP3":
+//					break;
+				default:
+					if( callbacks && callbacks['done'] ) callbacks['done'](data);
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, data));
 			}
-			if( callbacks && callbacks['done'] ) callbacks['done'](data);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, data));
 		}
 		
 		protected function onProgress(evt:ProgressEvent):void
 		{
 			if( callbacks && callbacks['doing'] ) callbacks['doing'](evt.bytesLoaded, evt.bytesTotal);
-//			SystemUtils.print("[Class TakeService]:onProgress:"+evt.bytesLoaded+"/"+evt.bytesTotal);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, {loaded:evt.bytesLoaded, total:evt.bytesTotal}));
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, {loaded:evt.bytesLoaded, total:evt.bytesTotal}));
 		}
 		
 		protected function onError(evt:IOErrorEvent):void
 		{
 			SystemUtils.print("[Class TakeService]:onError:"+evt.type);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			close();
 		}
 		
 		protected function onSecurityError(evt:SecurityErrorEvent):void
 		{
 			SystemUtils.print("[Class TakeService]:onSecurityError:"+evt.type);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 			close();
 		}
 	}

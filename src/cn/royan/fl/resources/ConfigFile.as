@@ -57,6 +57,8 @@ package cn.royan.fl.resources
 				var xml:XML = new XML(data);
 				SystemUtils.print("[Class ConfigFile]:XML To Object");
 				
+				parseXMLListToObject(xml.children(), configData);
+				SystemUtils.readObject(configData);
 				System.disposeXML(xml);
 			}catch(e:Error){
 				var xmlDoc:XMLDocument = PoolMap.getInstanceByType(XMLDocument);
@@ -65,14 +67,39 @@ package cn.royan.fl.resources
 				
 				parseXMLNodeToObject(xmlDoc, configData);
 				SystemUtils.print("[Class ConfigFile]:XMLDocument To Object");
-				//PoolBase.disposeInstance(xmlDoc);
+//				PoolMap.disposeInstance(xmlDoc);
 				xmlDoc = null;
 			}
 		}
 		
 		protected function parseXMLListToObject(xmlList:XMLList, parent:Object):void
 		{
-			
+			var i:int = 0;
+			var len:int = xmlList.length();
+			for( i = 0; i < len; i++ ){
+				var child:Object = new Object();
+				
+				if( !parent[xmlList[i].name()] ){
+					parent[xmlList[i].name()] = child;
+				}
+				else if( parent[xmlList[i].name()] is Array ){
+					parent[xmlList[i].name()].push( child );
+				}else{
+					var temp:Object = parent[xmlList[i].name()];
+					parent[xmlList[i].name()] = [temp];
+					parent[xmlList[i].name()].push( child );
+				}
+				if( xmlList[i].children().length() > 0 ){
+					parseXMLListToObject(xmlList[i].children(), child);
+				}
+				
+				var j:int = 0;
+				var len2:int = xmlList[i].attributes().length();
+				for (j = 0; j < len2; j++)
+				{
+					child[xmlList[i].attributes()[j].name().toString()] = xmlList[i].attributes()[j].toString();
+				}
+			}
 		}
 		
 		protected function parseXMLNodeToObject(xmlNode:XMLNode, parent:Object):void
