@@ -131,9 +131,21 @@ package cn.royan.fl.uis.bases
 			goFromTo(current, to);
 		}
 		
+		public function jumpTo(to:int):void
+		{
+			if( getChildAt(0) ) removeChildAt(0);
+			
+			current = to;
+			
+			if(bgTextures[current-1])
+				addChild(bgTextures[current-1]);
+		}
+		
 		public function goFromTo(from:int, to:int):void
 		{
 			SystemUtils.print("play from["+from+"] to ["+to+"]");
+			if( from == to ) return;
+			
 			loop = false;
 			sequence = from <= to;
 			current = from;

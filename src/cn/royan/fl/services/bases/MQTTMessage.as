@@ -1,5 +1,6 @@
 package cn.royan.fl.services.bases
 {
+	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.services.IServiceMessageBase;
 	
 	import flash.utils.ByteArray;
@@ -22,54 +23,53 @@ package cn.royan.fl.services.bases
 		public static const PINGRESP:uint 	= 0xD0;
 		public static const DISCONNECT:uint 	= 0xE0;
 		
+		protected var fixHead:ByteArray;
+		protected var varHead:ByteArray;
+		
 		public function MQTTMessage()
 		{
 			super();
 		}
 		
-		public function writeMessageType(type:int):void
+		public function writeMessageType(type:int):void//Fix Head
 		{
 			this.position = 0;
-			this.writeByte(type);
-			this.writeByte(0x00);
+			
+			fixHead = PoolMap.getInstanceByType(ByteArray);
+			fixHead.position = 0;
+			fixHead.writeByte(type);
+			fixHead.writeByte(0x00);
+			fixHead.readBytes(this,0,2);
 		}
 		
-		public function writeMessageValue(value:*):void
+		public function writeMessageValue(value:*):void//Variable Head
 		{
 			this.position = 1;
 			this.writeByte(value.length);
 			this.writeBytes(value);
 		}
 		
-		public function isConnack():Boolean
+		public function getMessageType():ByteArray
 		{
 			this.position = 0;
-			var params:Array = [this.readByte(), this.readByte(), this.readByte(), this.readByte()];
-			return ( params[0] == CONNACK ) && params[3] ==0;
+			
+			if( fixHead == null && this.length > 0 ){
+				fixHead = PoolMap.getInstanceByType(ByteArray);
+				
+				this.readBytes(fixHead, 0, 2);
+			}
+			return fixHead;
 		}
 		
-//		public function isPuback():Boolean
-//		{
-//			this.position = 0;
-//			return this.readUnsignedByte() == PUBACK;
-//		}
-//		
-//		public function isSuback():Boolean
-//		{
-//			this.position = 0;
-//			return this.readUnsignedByte() == SUBACK;
-//		}
-//		
-//		public function isUnsuback():Boolean
-//		{
-//			this.position = 0;
-//			return this.readUnsignedByte() == UNSUBACK;
-//		}
-//		
-//		public function isPingResp():Boolean
-//		{
-//			this.position = 0;
-//			return this.readUnsignedByte() == PINGRESP;
-//		}
+		public function getMessageValue():ByteArray
+		{
+			this.position = 0;
+			if( varHead == null && this.length > 2 ){
+				varHead = PoolMap.getInstanceByType(ByteArray);
+				
+				this.readBytes(varHead, 2);
+			}
+			return varHead;
+		}
 	}
 }

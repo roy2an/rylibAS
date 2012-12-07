@@ -40,6 +40,11 @@ package cn.royan.fl.uis.embeds
 			
 		}
 		
+		public function jumpTo(to:int):void
+		{
+			
+		}
+		
 		public function goFromTo(from:int, to:int):void
 		{
 			

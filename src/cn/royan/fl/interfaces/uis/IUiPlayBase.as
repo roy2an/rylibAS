@@ -7,6 +7,7 @@ package cn.royan.fl.interfaces.uis
 		function getIn():void;
 		function getOut():void;
 		function goTo(to:int):void;
+		function jumpTo(to:int):void;
 		function goFromTo(from:int,to:int):void;
 	}
 }

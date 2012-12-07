@@ -34,6 +34,37 @@ package cn.royan.fl.uis.bases
 			draw();
 		}
 		
+		public function addItemAt(item:IUiBase, index:int):void
+		{
+			var start:Vector.<IUiBase> = items.slice(0, index);
+			var end:Vector.<IUiBase> = items.slice(index);
+			start.push(item);
+			
+			items = start.concat(end);
+			
+			addChildAt( item as DisplayObject, index );
+			draw();
+		}
+		
+		public function removeItem(item:IUiBase):void
+		{
+			if( contains(item as DisplayObject) ) removeChild(item as DisplayObject);
+			items.splice( items.indexOf(item), 1);
+			
+			draw();
+		}
+		
+		public function removeItemAt(index:int):void
+		{
+			if( index < 0 || index >= items.length ) return;
+			
+			if( contains( items[index] as DisplayObject ) ) 
+				removeChild(items[index] as DisplayObject);
+			items.splice( index, 1);
+			
+			draw();
+		}
+		
 		public function setHorizontalAlign(value:uint):void
 		{
 			horizontalAlign = value;

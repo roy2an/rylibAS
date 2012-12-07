@@ -1,6 +1,7 @@
 package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;

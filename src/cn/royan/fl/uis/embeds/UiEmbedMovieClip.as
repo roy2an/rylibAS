@@ -119,6 +119,11 @@ package cn.royan.fl.uis.embeds
 			goFromTo(currentFrame, to);
 		}
 		
+		public function jumpTo(to:int):void
+		{
+			
+		}
+		
 		public function goFromTo(from:int, to:int):void
 		{
 			SystemUtils.print("play from["+from+"] to ["+to+"]");

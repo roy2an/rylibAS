@@ -128,8 +128,9 @@ package cn.royan.fl.services
 			
 			socket.close();
 			servicing = false;
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DESTROY));
+			
 			if( callbacks && callbacks['destory'] ) callbacks['destory']();
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_DESTROY));
 		}
 		
 		public function dispose():void
@@ -201,7 +202,7 @@ package cn.royan.fl.services
 		{
 			SystemUtils.print("[Class MQTTService]:IO Error: " + evt);
 			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, event.type));
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 		}
 		
 		protected function onProgress(event:ProgressEvent):void
@@ -213,19 +214,7 @@ package cn.royan.fl.services
 			
 			switch(packet.readUnsignedByte()){
 				case MQTTMessage.CONNACK:
-					packet.position = 3;
-					if(packet.isConnack())
-					{
-						SystemUtils.print( "[Class MQTTService]:Socket connected" );
-						servicing = true;
-//						dispatchEvent(new DatasEvent(DatasEvent.DATA_CREATE));
-						if( callbacks && callbacks['create'] ) callbacks['create']();
-						timer.start();
-					}else{
-						SystemUtils.print( "[Class MQTTService]:Connection failed!" );
-//						dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection failed!"));
-						if( callbacks && callbacks['error'] ) callbacks['error']("Connection failed!");
-					}
+					onConnack();
 					break;
 				case MQTTMessage.PUBACK:
 					SystemUtils.print( "[Class MQTTService]:Publish Acknowledgment" );
@@ -244,19 +233,71 @@ package cn.royan.fl.services
 			}
 		}
 		
+		protected function onConnack():void
+		{
+			var varHead:ByteArray = packet.getMessageValue();
+				varHead.position = 1;
+			switch(varHead.readUnsignedByte()){
+				case 0x00:
+					SystemUtils.print( "[Class MQTTService]:Socket connected" );
+					servicing = true;
+					
+					if( callbacks && callbacks['create'] ) callbacks['create']();
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_CREATE));
+					
+					timer.start();
+					break;
+				case 0x01:
+					SystemUtils.print( "[Class MQTTService]:Connection Refused: unacceptable protocol version" );
+						
+					if( callbacks && callbacks['error'] ) callbacks['error']("Connection Refused: unacceptable protocol version");
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection Refused: unacceptable protocol version"));
+					
+					break;
+				case 0x02:
+					SystemUtils.print( "[Class MQTTService]:Connection Refused: identifier rejected" );
+					
+					if( callbacks && callbacks['error'] ) callbacks['error']("Connection Refused: identifier rejected");
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection Refused: identifier rejected"));
+					
+					break;
+				case 0x03:
+					SystemUtils.print( "[Class MQTTService]:Connection Refused: server unavailable" );
+					
+					if( callbacks && callbacks['error'] ) callbacks['error']("Connection Refused: server unavailable");
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection Refused: server unavailable"));
+					
+					break;
+				case 0x04:
+					SystemUtils.print( "[Class MQTTService]:Connection Refused: bad user name or password" );
+					
+					if( callbacks && callbacks['error'] ) callbacks['error']("Connection Refused: bad user name or password");
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection Refused: bad user name or password"));
+					
+					break;
+				case 0x05:
+					SystemUtils.print( "[Class MQTTService]:Connection Refused: not authorized" );
+					
+					if( callbacks && callbacks['error'] ) callbacks['error']("Connection Refused: not authorized");
+					else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, "Connection Refused: not authorized"));
+					
+					break;
+			}
+		}
+		
 		protected function onSecurityError(evt:SecurityErrorEvent):void
 		{
 			SystemUtils.print("[Class MQTTService]:Security Error: " + evt);
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, event.type));
 			if( callbacks && callbacks['error'] ) callbacks['error'](evt.type);
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_ERROR, evt.type));
 		}
 		
 		protected function onClose(event:Event):void
 		{
 			SystemUtils.print("[Class MQTTService]:Server close link");
 			servicing = false;
-//			dispatchEvent(new DatasEvent(DatasEvent.DATA_DESTROY));
 			if( callbacks && callbacks['destory'] ) callbacks['destory']();
+			else dispatchEvent(new DatasEvent(DatasEvent.DATA_DESTROY));
 		}
 		
 		protected function onPing(event:TimerEvent):void

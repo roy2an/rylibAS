@@ -22,6 +22,7 @@ package cn.royan.fl.uis.bases
 			inputText.text = text;
 			inputText.mouseEnabled 	= false;
 			inputText.selectable 	= false;
+			
 			inputText.defaultTextFormat = getDefaultFormat();
 			
 			setSize(100, 20);
@@ -38,6 +39,13 @@ package cn.royan.fl.uis.bases
 			return inputText.getTextFormat();
 		}
 		
+		public function setTextAlign(value:String):void
+		{
+			var format:TextFormat = getFormat();
+				format.align = value;
+			inputText.defaultTextFormat = format;
+		}
+		
 		public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){
@@ -46,6 +54,22 @@ package cn.royan.fl.uis.bases
 				defaultFormat.size = 14;
 			}
 			return defaultFormat;
+		}
+		
+		public function setScroll(h:int=0, v:int=0):void
+		{
+			inputText.scrollH = h;
+			inputText.scrollV = v;
+		}
+		
+		public function getScroll():Array
+		{
+			return [inputText.scrollH, inputText.scrollV];
+		}
+		
+		public function getMaxScroll():Array
+		{
+			return [inputText.maxScrollH, inputText.maxScrollV];
 		}
 		
 		public function getText():String
