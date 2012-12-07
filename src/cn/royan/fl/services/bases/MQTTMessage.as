@@ -49,7 +49,7 @@ package cn.royan.fl.services.bases
 			this.writeBytes(value);
 		}
 		
-		public function getMessageType():ByteArray
+		public function readMessageType():ByteArray
 		{
 			this.position = 0;
 			
@@ -61,7 +61,7 @@ package cn.royan.fl.services.bases
 			return fixHead;
 		}
 		
-		public function getMessageValue():ByteArray
+		public function readMessageValue():ByteArray
 		{
 			this.position = 0;
 			if( varHead == null && this.length > 2 ){

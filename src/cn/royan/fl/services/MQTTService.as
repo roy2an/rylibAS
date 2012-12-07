@@ -235,7 +235,7 @@ package cn.royan.fl.services
 		
 		protected function onConnack():void
 		{
-			var varHead:ByteArray = packet.getMessageValue();
+			var varHead:ByteArray = packet.readMessageValue();
 				varHead.position = 1;
 			switch(varHead.readUnsignedByte()){
 				case 0x00:

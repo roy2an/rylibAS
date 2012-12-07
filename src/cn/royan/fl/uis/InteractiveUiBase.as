@@ -1,7 +1,6 @@
 package cn.royan.fl.uis
 {
 	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.utils.SystemUtils;
@@ -32,8 +31,8 @@ package cn.royan.fl.uis
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
 		protected var bgTexture:BitmapData;
-		protected var containerWidth:Number;
-		protected var containerHeight:Number;
+		protected var containerWidth:int;
+		protected var containerHeight:int;
 		protected var matrix:Matrix;
 		protected var isMouseRender:Boolean;
 		protected var callbacks:Object;

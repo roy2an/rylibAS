@@ -1,15 +1,15 @@
 package cn.royan.fl.uis.bases
 {
+	import flash.display.DisplayObject;
+	
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
-	
-	import flash.display.DisplayObject;
 	
 	public class UiBaseContainer extends InteractiveUiBase
 	{
 		public static const LEFT:uint = 1;
 		public static const RIGHT:uint = 2;
-		public static const CNETER:uint = 3;
+		public static const CENTER:uint = 3;
 		
 		public static const TOP:uint = 1;
 		public static const BOTTOM:uint = 2;
@@ -20,6 +20,9 @@ package cn.royan.fl.uis.bases
 		protected var verticalAlign:uint;
 		protected var gaps:Object;
 		protected var margins:Object;
+		protected var rows:Array;
+		protected var itemsWidth:int;
+		protected var itemsHeight:int;
 		
 		public function UiBaseContainer()
 		{
@@ -104,24 +107,105 @@ package cn.royan.fl.uis.bases
 		
 		override public function draw():void
 		{
-			var offsetX:int = margins?margins['l']:0;
-			var offsetY:int = margins?margins['t']:0;
-			var lineHeight:int = 0;
+			fillRowHandler();
+			drawRowHandler();
+		}
+		
+		protected function fillRowHandler():void
+		{
+			var rowW:int	= 0;
+			var rowH:int	= 0;
 			
-			for each(var item:IUiBase in items)
-			{
-				var size:Array = item.getSize();
+			var marginT:int = margins?margins['t']:0;
+			var marginR:int = margins?margins['r']:0;
+			var marginB:int = margins?margins['b']:0;
+			var marginL:int = margins?margins['l']:0;
+			
+			var gapX:int = gaps?gaps['x']:0;
+			var gapY:int = gaps?gaps['y']:0;
+			
+			itemsWidth = 0;
+			itemsHeight = 0;
+			
+			rows = [];
+			
+			var i:int;
+			var itemNumber:int;
+			var rowNumber:int;
+			for ( i = 0; i < items.length; i++ ) {
 				
-				if( size[0] + offsetX + (gaps?gaps['x']:0) > getSize()[0] )
-				{
-					offsetX = margins?margins['l']:0;
-					offsetY += lineHeight + (gaps?gaps['y']:0);
+				var item:IUiBase = items[i] as IUiBase;
+				if ( rowW + ( (i > 0 ? 1:0) * gapX + item.getSize()[0] ) > containerWidth - marginL - marginR ) {
+					//prev row end
+					rows.push( { width: rowW, height: rowH, length:itemNumber } );
+					itemsWidth = Math.max( itemsWidth, rowW );
+					itemsHeight += (rowNumber > 0 ? 1:0) * gapY + rowH;
+					rowNumber++;
+					//next row start
+					rowW = item.getSize()[0];
+					rowH = item.getSize()[1];
+					itemNumber = 1;
+				}else {
+					rowW += ( (i > 0 ? 1:0) * gapX + item.getSize()[0]);
+					rowH = Math.max( rowH, item.getSize()[1] );
+					itemNumber++;
+				}
+			}
+			rows.push( { width: rowW, height: rowH, length:itemNumber } );
+			
+			itemsWidth = Math.max( itemsWidth, rowW );
+			itemsHeight += (rowNumber > 0 ? 1:0) * gapY + rowH;
+		}
+		
+		protected function drawRowHandler():void
+		{
+			var rowW:int	= 0;
+			var rowH:int	= 0;
+			
+			var marginT:int = margins?margins['t']:0;
+			var marginR:int = margins?margins['r']:0;
+			var marginB:int = margins?margins['b']:0;
+			var marginL:int = margins?margins['l']:0;
+			
+			var gapX:int = gaps?gaps['x']:0;
+			var gapY:int = gaps?gaps['y']:0;
+			
+			var offsetX:int;
+			var offsetY:int;
+			
+			switch( verticalAlign ) {
+				case BOTTOM:
+					offsetY = containerHeight - marginB - itemsHeight;
+					break;
+				case MIDDLE:
+					offsetY = (containerHeight - itemsHeight) / 2;
+					break;
+				default:
+					offsetY = marginT;
+			}
+			
+			var i:int;
+			var z:int;
+			for ( i = 0; i < rows.length; i++ ) {
+				
+				switch( horizontalAlign ) {
+					case RIGHT:
+						offsetX = containerWidth - marginR - rows[i].width;
+						break;
+					case CENTER:
+						offsetX = (containerWidth - rows[i].width) / 2;
+						break;
+					default:
+						offsetX = marginL;
 				}
 				
-				item.setPosition(offsetX, offsetY);
-				
-				offsetX += item.getSize()[0] + (gaps?gaps['x']:0);
-				lineHeight = Math.max(item.getSize()[1], lineHeight);
+				var j:int;
+				for( j = 0; j < rows[i].length; j++ ){
+					items[z].setPosition( offsetX, offsetY );
+					offsetX += items[z].getSize()[0] + gapX;
+					z++;
+				}
+				offsetY += rows[i].height + gapY;
 			}
 		}
 		
