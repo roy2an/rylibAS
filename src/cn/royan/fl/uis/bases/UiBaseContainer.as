@@ -53,7 +53,6 @@ package cn.royan.fl.uis.bases
 		{
 			if( contains(item as DisplayObject) ) removeChild(item as DisplayObject);
 			items.splice( items.indexOf(item), 1);
-			
 			draw();
 		}
 		
@@ -90,8 +89,9 @@ package cn.royan.fl.uis.bases
 			return items.indexOf(item);
 		}
 		
-		public function getItemByIndex(index:uint):IUiBase
+		public function getItemByIndex(index:int):IUiBase
 		{
+			if( index < 0 || index >= items.length ) return null;
 			return items[index];
 		}
 		

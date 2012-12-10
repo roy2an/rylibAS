@@ -46,6 +46,11 @@ package cn.royan.fl.uis.bases
 			inputText.defaultTextFormat = format;
 		}
 		
+		public function setTextColor(value:uint):void
+		{
+			inputText.textColor = value;
+		}
+		
 		public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){
