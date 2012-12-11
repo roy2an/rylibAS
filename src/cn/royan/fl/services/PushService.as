@@ -3,7 +3,7 @@ package cn.royan.fl.services
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
-	import cn.royan.fl.services.bases.PushHelper;
+	import cn.royan.fl.services.bases.PushServiceHelper;
 	import cn.royan.fl.utils.BytesUtils;
 	import cn.royan.fl.utils.SystemUtils;
 	
@@ -49,8 +49,8 @@ package cn.royan.fl.services
 			urlrequest = new URLRequest(url);
 			urlrequest.data = urlvariable;
 			urlrequest.method = URLRequestMethod.POST;
-			urlrequest.contentType = "multipart/form-data; boundary=" + PushHelper.getBoundary();
-			urlrequest.data = PushHelper.getPostData( 'image.jpg', extra as ByteArray, "filedata", urlvariable );
+			urlrequest.contentType = "multipart/form-data; boundary=" + PushServiceHelper.getBoundary();
+			urlrequest.data = PushServiceHelper.getPostData( 'image.jpg', extra as ByteArray, "filedata", urlvariable );
 			urlrequest.requestHeaders.push( new URLRequestHeader( 'Cache-Control', 'no-cache' ) );
 		}
 		

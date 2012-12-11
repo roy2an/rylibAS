@@ -20,7 +20,7 @@ package cn.royan.fl.resources
 		protected static var __loaderMap:Array = [];
 		protected static var __weakMap:WeakMap = WeakMap.getInstance();
 		
-		protected var uid:uint;
+		protected var uid:String;
 		protected var moduleKey:String;
 		protected var moduleVer:String;
 		protected var takeService:TakeService;
@@ -41,7 +41,7 @@ package cn.royan.fl.resources
 		
 		public function ResourceLoader(key:String, container:DisplayObjectContainer, version:String, type:ResourceLoaderType)
 		{
-			uid = SystemUtils.createObjectUID();
+			uid = SystemUtils.createUniqueID();
 			
 			moduleKey = key;
 			moduleVer = version;

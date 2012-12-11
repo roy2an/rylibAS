@@ -14,7 +14,6 @@ package cn.royan.fl.uis
 
 	public class UninteractiveUiBase extends Shape implements IUiBase
 	{
-		protected var uid:uint;
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
 		protected var bgTexture:BitmapData;
@@ -27,8 +26,6 @@ package cn.royan.fl.uis
 			super();
 			
 			cacheAsBitmap = true;
-			
-			uid = SystemUtils.createObjectUID();
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();

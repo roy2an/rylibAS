@@ -21,7 +21,7 @@ package cn.royan.fl.services.bases
 	 * @see http://creativecommons.org/licenses/by-nc-sa/3.0/
 	 *
 	 */
-	public class PushHelper
+	public class PushServiceHelper
 	{
 		
 		/**
@@ -121,7 +121,7 @@ package cn.royan.fl.services.bases
 		 * Add a boundary to the PostData with leading doubledash
 		 */
 		private static function BOUNDARY(p:ByteArray):ByteArray {
-			var l:int = PushHelper.getBoundary().length;
+			var l:int = PushServiceHelper.getBoundary().length;
 			
 			p = DOUBLEDASH(p);
 			for (var i:int = 0; i < l; i++ ) {

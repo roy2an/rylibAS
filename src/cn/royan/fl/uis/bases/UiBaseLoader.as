@@ -16,14 +16,15 @@ package cn.royan.fl.uis.bases
 		protected var currentFileName:UiBaseText;
 		protected var loaderData:EventDispatcher;
 		
-		public function UiBaseLoader(loaderData:EventDispatcher, texture:BitmapData=null)
+		public function UiBaseLoader(loader:EventDispatcher=null, texture:BitmapData=null)
 		{
 			super(texture);
 			
-			uid = SystemUtils.createObjectUID();
-			
-			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
-			loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
+			if( loader ){
+				loaderData = loader;
+				loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
+				loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
+			}
 			
 			progressTxt = PoolMap.getInstanceByType(UiBaseText);
 			progressTxt.setText("0%");
@@ -38,6 +39,13 @@ package cn.royan.fl.uis.bases
 			currentFileName = PoolMap.getInstanceByType(UiBaseText);
 			currentFileName.setSize(100, 20);
 			addChild(currentFileName);
+		}
+		
+		public function setLoaderData(loader:EventDispatcher):void
+		{
+			loaderData = loader;
+			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
+			loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
 		}
 		
 		public function setFileName(fileName:String, desp:String):void

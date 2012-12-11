@@ -23,7 +23,6 @@ package cn.royan.fl.uis
 		public static const SELECTED:int = 3;
 		public static const DISABLE:int = 4;
 		
-		protected var uid:uint;
 		protected var status:uint;
 		protected var statusLen:uint;
 		protected var selected:Boolean;
@@ -45,8 +44,6 @@ package cn.royan.fl.uis
 			super();
 			
 			cacheAsBitmap = true;
-			
-			uid = SystemUtils.createObjectUID();
 			
 			bgColors = getDefaultBackgroundColors();
 			bgAlphas = getDefaultBackgroundAlphas();

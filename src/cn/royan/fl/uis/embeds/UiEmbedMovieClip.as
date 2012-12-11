@@ -13,9 +13,6 @@ package cn.royan.fl.uis.embeds
 	
 	public class UiEmbedMovieClip extends MovieClip implements IUiPlayBase
 	{
-		protected static var __weakMap:WeakMap = WeakMap.getInstance();
-		
-		protected var uid:uint;
 		protected var eventMap:Dictionary;
 		protected var timer:Timer;
 		protected var bindToFrameRate:Boolean;
@@ -29,17 +26,12 @@ package cn.royan.fl.uis.embeds
 			super();
 			
 			bindToFrameRate = auto;
-			
-			uid = SystemUtils.createObjectUID();
-			
 			eventMap = new Dictionary(true);
 			
 			if( !bindToFrameRate )
 			{
 				timer = PoolMap.getInstanceByType(Timer, 1000 / rate);
 				timer.addEventListener(TimerEvent.TIMER, timerHandler);
-				
-				__weakMap.set("timer" + uid, timer);
 			}else{
 				addEventListener(Event.ENTER_FRAME, enterframeHandler);
 			}
@@ -145,10 +137,7 @@ package cn.royan.fl.uis.embeds
 		
 		public function dispose():void
 		{
-			if( __weakMap.getValue("timer" + uid) ){
-				PoolMap.disposeInstance(timer);
-				__weakMap.clear("timer" + uid);
-			}
+			PoolMap.disposeInstance(timer);
 		}
 		
 		protected function removeFromStageHandler(evt:Event):void

@@ -2,10 +2,9 @@ package cn.royan.fl.services
 {
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.TimerBase;
-	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
-	import cn.royan.fl.services.bases.MQTTMessage;
+	import cn.royan.fl.services.bases.MQTTServiceMessage;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.events.Event;
@@ -19,8 +18,6 @@ package cn.royan.fl.services
 	
 	public class MQTTService extends EventDispatcher implements IServiceBase
 	{
-		protected static var __weakMap:WeakMap = WeakMap.getInstance();
-		
 		protected var keepalive:int = 10;
 		protected var host:String;
 		protected var port:int;
@@ -34,7 +31,7 @@ package cn.royan.fl.services
 		protected var timer:TimerBase;
 		protected var msgid:int;
 		protected var callbacks:Object;
-		protected var packet:MQTTMessage;
+		protected var packet:MQTTServiceMessage;
 		
 		public function MQTTService(host:String, port:uint, clientid:String='')
 		{
@@ -63,10 +60,10 @@ package cn.royan.fl.services
 						
 						writeString(bytes, extra.content);
 						
-						var messageType:int = MQTTMessage.PUBLISH;
+						var messageType:int = MQTTServiceMessage.PUBLISH;
 						if( extra.qos ) messageType += extra.qos << 1;
 						if( extra.retain ) messageType += 1;
-						var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
+						var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
 							mqttBytes.writeMessageType(messageType);
 							mqttBytes.writeMessageValue(bytes);
 						
@@ -116,8 +113,8 @@ package cn.royan.fl.services
 		
 		public function close():void
 		{
-			var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
-			mqttBytes.writeMessageType(MQTTMessage.DISCONNECT);
+			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
+			mqttBytes.writeMessageType(MQTTServiceMessage.DISCONNECT);
 				
 			socket.writeBytes(mqttBytes);
 			socket.flush();
@@ -184,8 +181,8 @@ package cn.royan.fl.services
 			writeString(bytes, clientid);
 			writeString(bytes, username?username:"");
 			writeString(bytes, password?password:"");
-			var mqttBytes:MQTTMessage = PoolMap.getInstanceByType(MQTTMessage);
-				mqttBytes.writeMessageType(MQTTMessage.CONNECT);
+			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
+				mqttBytes.writeMessageType(MQTTServiceMessage.CONNECT);
 				mqttBytes.writeMessageValue(bytes);
 			
 			socket.writeBytes(mqttBytes);
@@ -208,24 +205,24 @@ package cn.royan.fl.services
 		protected function onProgress(event:ProgressEvent):void
 		{
 			SystemUtils.print( "[Class MQTTService]:Socket received " + socket.bytesAvailable + " byte(s) of data:");
-			packet = PoolMap.getInstanceByType(MQTTMessage);
+			packet = PoolMap.getInstanceByType(MQTTServiceMessage);
 			
 			socket.readBytes(packet);
 			
 			switch(packet.readUnsignedByte()){
-				case MQTTMessage.CONNACK:
+				case MQTTServiceMessage.CONNACK:
 					onConnack();
 					break;
-				case MQTTMessage.PUBACK:
+				case MQTTServiceMessage.PUBACK:
 					SystemUtils.print( "[Class MQTTService]:Publish Acknowledgment" );
 					break;
-				case MQTTMessage.SUBACK:
+				case MQTTServiceMessage.SUBACK:
 					SystemUtils.print( "[Class MQTTService]:Subscribe Acknowledgment" );
 					break;
-				case MQTTMessage.UNSUBACK:
+				case MQTTServiceMessage.UNSUBACK:
 					SystemUtils.print( "[Class MQTTService]:Unsubscribe Acknowledgment" );
 					break;
-				case MQTTMessage.PINGRESP:
+				case MQTTServiceMessage.PINGRESP:
 					SystemUtils.print( "[Class MQTTService]:Ping Response" );
 					break;
 				default:
@@ -302,8 +299,8 @@ package cn.royan.fl.services
 		
 		protected function onPing(event:TimerEvent):void
 		{
-			var bytes:MQTTMessage = new MQTTMessage();
-			bytes.writeMessageType(MQTTMessage.PINGREQ);
+			var bytes:MQTTServiceMessage = new MQTTServiceMessage();
+			bytes.writeMessageType(MQTTServiceMessage.PINGREQ);
 			socket.writeBytes(bytes);
 			socket.flush();
 			SystemUtils.print("[Class MQTTService]:Ping sent");
