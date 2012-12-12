@@ -1,5 +1,6 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
@@ -9,7 +10,6 @@ package cn.royan.fl.services
 	
 	import flash.display.Loader;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
@@ -20,7 +20,7 @@ package cn.royan.fl.services
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	
-	public class PushService extends EventDispatcher implements IServiceBase
+	public class PushService extends DispacherBase implements IServiceBase
 	{
 		protected var servicing:Boolean;
 		protected var urlstream:URLStream;
@@ -89,7 +89,8 @@ package cn.royan.fl.services
 			serviceData = null;
 			urlrequest = null;
 			urlvariable = null;
-			callbacks = null
+			callbacks = null;
+			removeAllEventListener();
 		}
 		
 		public function get data():*

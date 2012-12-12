@@ -1,10 +1,8 @@
 package cn.royan.fl.bases
 {
-	import flash.events.EventDispatcher;
-	
 	import cn.royan.fl.events.DatasEvent;
 	
-	public class BindBase extends EventDispatcher
+	public class BindBase extends DispacherBase
 	{
 		public function BindBase()
 		{

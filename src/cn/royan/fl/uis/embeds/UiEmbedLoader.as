@@ -1,8 +1,8 @@
 package cn.royan.fl.uis.embeds
 {
 	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.uis.InteractiveUiBase;
 	
+	import flash.display.Sprite;
 	import flash.events.EventDispatcher;
 	import flash.text.TextField;
 
@@ -11,21 +11,34 @@ package cn.royan.fl.uis.embeds
 		protected var loaderData:EventDispatcher;
 		protected var currentFileName:TextField;
 		protected var progressTxt:TextField;
-		protected var progressBar:InteractiveUiBase;
+		protected var progressBar:Sprite;
 		
 		public function UiEmbedLoader(loader:EventDispatcher = null)
 		{
 			if( loader ) setLoaderData( loader );
-			progressBar = getChildByName("__progress") as InteractiveUiBase;
-			progressTxt = getChildByName("__progressTxt") as TextField;
-			currentFileName = getChildByName("__currentFile") as TextField;
+			if( getChildByName("__progress") )
+				progressBar = getChildByName("__progress") as Sprite;
+			if( getChildByName("__progressTxt") )
+				progressTxt = getChildByName("__progressTxt") as TextField;
+			if( getChildByName("__currentFile") )
+				currentFileName = getChildByName("__currentFile") as TextField;
 		}
 		
 		public function setLoaderData(loader:EventDispatcher):void
 		{
 			loaderData = loader;
-			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderPorgressHandler);
+			loaderData.addEventListener(DatasEvent.DATA_DOING, loaderProgressHandler);
 			loaderData.addEventListener(DatasEvent.DATA_DONE, loaderCompleteHandler);
+		}
+		
+		public function loaderProgress(loaded:uint, total:uint):void
+		{
+			
+		}
+		
+		public function loaderComplete():void
+		{
+			
 		}
 		
 		public function setFileName(fileName:String, desp:String):void
@@ -33,7 +46,7 @@ package cn.royan.fl.uis.embeds
 			
 		}
 		
-		protected function loaderPorgressHandler(evt:DatasEvent):void
+		protected function loaderProgressHandler(evt:DatasEvent):void
 		{
 			
 		}

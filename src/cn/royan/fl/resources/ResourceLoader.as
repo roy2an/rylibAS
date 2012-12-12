@@ -1,21 +1,24 @@
 package cn.royan.fl.resources
 {
+	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.services.TakeService;
+	import cn.royan.fl.uis.embeds.UiEmbedLoader;
 	import cn.royan.fl.utils.SystemUtils;
 	
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Loader;
 	import flash.display.Stage;
-	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.setTimeout;
 	import flash.xml.XMLDocument;
 
-	public class ResourceLoader extends EventDispatcher implements IDisposeBase
+	public class ResourceLoader extends DispacherBase implements IDisposeBase
 	{
 		protected static var __loaderMap:Array = [];
 		protected static var __weakMap:WeakMap = WeakMap.getInstance();
@@ -29,6 +32,8 @@ package cn.royan.fl.resources
 		protected var currentPath:String;
 		protected var stageView:DisplayObjectContainer;
 		protected var callbacks:Object;
+		protected var root:DisplayObjectContainer;
+		protected var loader:UiEmbedLoader;
 		
 		public static function getInstance(key:String, container:DisplayObjectContainer, version:String="1.0"):ResourceLoader
 		{
@@ -43,15 +48,21 @@ package cn.royan.fl.resources
 		{
 			uid = SystemUtils.createUniqueID();
 			
+			root = container;
+			
 			moduleKey = key;
 			moduleVer = version;
 			
 			stageView = container;
 			
+			currentPath = "component/loadinglibs.swf";
+			
 			takeService = PoolMap.getInstanceByType( TakeService, "version="+moduleVer );
-			takeService.setCallbacks({done:configFileOnCompleteHandler,
-									  doing:configFileOnProgressHandler,
-									  error:configFileOnErrorHandler});
+			takeService.setCallbacks({done:loaderOnCompleteHandler,
+									  doing:loaderOnProgressHandler,
+									  error:loaderOnErrorHandler})
+			takeService.sendRequest(currentPath);
+			takeService.connect();
 		}
 		
 		public function load():void
@@ -80,6 +91,36 @@ package cn.royan.fl.resources
 		public function setCallbacks(value:Object):void
 		{
 			callbacks = value;
+		}
+		
+		protected function loaderOnProgressHandler(loaded:uint, total:uint):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Loader File OnProgress");
+		}
+		
+		protected function loaderOnCompleteHandler(data:*):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Loader File OnComplete");
+			__weakMap.set(currentPath + uid, data);
+			
+			takeService.dispose();
+			
+			loader = SystemUtils.getInstanceByClassName("LoaderClass") as UiEmbedLoader;
+			
+			root.addChild( loader );
+			
+			PoolMap.disposeInstance(takeService);
+			
+			takeService = PoolMap.getInstanceByType( TakeService, "version="+moduleVer );
+			takeService.setCallbacks({done:configFileOnCompleteHandler,
+									  doing:configFileOnProgressHandler,
+									  error:configFileOnErrorHandler});
+			load();
+		}
+		
+		protected function loaderOnErrorHandler(message:String):void
+		{
+			SystemUtils.print("[Class ResourceLoader]:Loader File OnError");
 		}
 		
 		protected function configFileOnProgressHandler(loaded:uint, total:uint):void
@@ -135,26 +176,29 @@ package cn.royan.fl.resources
 				SystemUtils.print("[Class ResourceLoader]:syn File OnFinish");
 				if( callbacks && callbacks['synDone'] ) callbacks['synDone']();
 				asynFileStartLoadHandler();	
+				
+				if( root.contains(loader) ) root.removeChild(loader);
 				return;
 			}
 		}
 		
 		protected function synFileOnProgressHandler(loaded:uint, total:uint):void
 		{
-			
+			loader.loaderProgress(loaded, total);
 		}
-		
 		
 		protected function synFileOnCompleteHandler(data:*):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:syn File OnComplete");
+			
+			loader.loaderComplete();
 			
 			__weakMap.set(currentPath + uid, data);
 			
 			takeService.dispose();
 			PoolMap.disposeInstance(takeService);
 			
-			synFileStartLoadHandler();
+			setTimeout(synFileStartLoadHandler, 500);
 		}
 		
 		protected function synFileOnErrorHandler(message:String):void

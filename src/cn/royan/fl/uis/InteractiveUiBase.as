@@ -335,6 +335,9 @@ package cn.royan.fl.uis
 			bgColors = null;
 			bgAlphas = null;
 			callbacks = null;
+			
+			removeAllChildren();
+			removeAllEventListener();
 		}
 	}
 }

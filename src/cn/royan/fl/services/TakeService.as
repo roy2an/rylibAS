@@ -1,5 +1,6 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
@@ -8,7 +9,6 @@ package cn.royan.fl.services
 	
 	import flash.display.Loader;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
@@ -20,7 +20,7 @@ package cn.royan.fl.services
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
-	public class TakeService extends EventDispatcher implements IServiceBase
+	public class TakeService extends DispacherBase implements IServiceBase
 	{
 		protected var urlstream:URLStream;
 		protected var urlrequest:URLRequest;
@@ -95,6 +95,8 @@ package cn.royan.fl.services
 			urlrequest = null;
 			urlvariable = null;
 			callbacks = null
+				
+			removeAllEventListener();
 		}
 		
 		public function get data():*
@@ -116,9 +118,12 @@ package cn.royan.fl.services
 			switch( BytesUtils.getType(serviceData) ){
 				case "SWF":
 					var loader:Loader = PoolMap.getInstanceByType(Loader);
+						loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function complete():void{
+							if( callbacks && callbacks['done'] ) callbacks['done'](loader);
+							else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
+						});
 						loader.loadBytes(serviceData, SystemUtils.getLoaderContext());
-					if( callbacks && callbacks['done'] ) callbacks['done'](loader);
-					else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE, loader));
+					
 					PoolMap.disposeInstance(loader);
 					break;
 //				case "XML":

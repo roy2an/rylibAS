@@ -1,19 +1,19 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	
-	public class SoktService extends EventDispatcher implements IServiceBase
+	public class SoktService extends DispacherBase implements IServiceBase
 	{
 		protected var callbacks:Object;
 		
@@ -75,6 +75,7 @@ package cn.royan.fl.services
 			socket.removeEventListener(Event.CLOSE, onClose);
 			socket = null;
 			callbacks = null;
+			removeAllEventListener();
 		}
 		
 		public function get data():*

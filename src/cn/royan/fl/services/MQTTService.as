@@ -1,5 +1,6 @@
 package cn.royan.fl.services
 {
+	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.TimerBase;
 	import cn.royan.fl.events.DatasEvent;
@@ -8,7 +9,6 @@ package cn.royan.fl.services
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
@@ -16,7 +16,7 @@ package cn.royan.fl.services
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	
-	public class MQTTService extends EventDispatcher implements IServiceBase
+	public class MQTTService extends DispacherBase implements IServiceBase
 	{
 		protected var keepalive:int = 10;
 		protected var host:String;
@@ -141,6 +141,8 @@ package cn.royan.fl.services
 			socket.removeEventListener(Event.CLOSE, onClose);
 			socket = null;
 			callbacks = null;
+			
+			removeAllEventListener();
 		}
 		
 		public function get data():*
