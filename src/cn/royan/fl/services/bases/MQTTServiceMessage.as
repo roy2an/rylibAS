@@ -25,6 +25,7 @@ package cn.royan.fl.services.bases
 		
 		protected var fixHead:ByteArray;
 		protected var varHead:ByteArray;
+		protected var payLoad:ByteArray;
 		
 		protected var type:int
 		protected var dup:int;
@@ -58,6 +59,12 @@ package cn.royan.fl.services.bases
 		public function writeRETAIN(value:int):void
 		{
 			retain = value;
+			writeMessageType(type + (dup << 3) + (qos << 1) + retain);
+		}
+		
+		public function writeRemainingLength(value:int):void
+		{
+			remainingLength = value;
 			writeMessageType(type + (dup << 3) + (qos << 1) + retain);
 		}
 		
@@ -111,34 +118,70 @@ package cn.royan.fl.services.bases
 		
 		public function writeMessageValue(value:*):void//Variable Head
 		{
-			remainingLength = value.length;
-			writeMessageType( type + (dup << 3) + (qos << 1) + retain );
+			this.position = 2;
 			this.writeBytes(value);
-			
-			if( varHead == null ) (value as ByteArray).readBytes(varHead);
+			this.serialize();
+			writeMessageType( type + (dup << 3) + (qos << 1) + retain );
 		}
 		
 		public function readMessageType():ByteArray
 		{
-			this.position = 0;
-			
-			if( fixHead == null && this.length > 0 ){
-				fixHead = PoolMap.getInstanceByType(ByteArray);
-				
-				this.readBytes(fixHead, 0, 2);
-			}
 			return fixHead;
 		}
 		
 		public function readMessageValue():ByteArray
 		{
-			this.position = 0;
-			if( varHead == null && this.length > 2 ){
-				varHead = PoolMap.getInstanceByType(ByteArray);
-				
-				this.readBytes(varHead, 2);
-			}
 			return varHead;
+		}
+		
+		public function readPayLoad():ByteArray
+		{
+			return payLoad;
+		}
+		
+		public function serialize():void
+		{
+			type 	= this.readyType();
+			dup 	= this.readDUP();
+			qos 	= this.readyQoS();
+			retain	= this.readyRETAIN();
+			
+			fixHead = PoolMap.getInstanceByType(ByteArray);
+			varHead = PoolMap.getInstanceByType(ByteArray);
+			payLoad = PoolMap.getInstanceByType(ByteArray);
+			
+			this.position = 0;
+			this.readBytes(fixHead, 0, 2);
+			
+			this.position = 2;
+			switch( type ){
+				case CONNECT://Remaining Length is the length of the variable header (12 bytes) and the length of the Payload
+					this.readBytes(varHead, 0 , 12);
+					this.readBytes(payLoad);
+					
+					remainingLength = varHead.length + payLoad.length;
+					break;
+				case PUBLISH://Remaining Length is the length of the variable header plus the length of the payload
+					var index:int = (this.readUnsignedByte() << 8) + this.readUnsignedByte();//the length of variable header
+					this.readBytes(varHead, 0 , index);
+					this.readBytes(payLoad);
+					
+					remainingLength = varHead.length + payLoad.length;
+					break;
+				case SUBSCRIBE://Remaining Length is the length of the payload
+				case SUBACK://Remaining Length is the length of the payload
+				case UNSUBSCRIBE://Remaining Length is the length of the payload
+					this.readBytes(varHead, 0 , 2);
+					this.readBytes(payLoad);
+					
+					remainingLength = payLoad.length;
+					break;
+				default://Remaining Length is the length of the variable header (2 bytes)
+					this.readBytes(varHead, 0 , 2);
+					
+					remainingLength = varHead.length;
+					break;
+			}
 		}
 	}
 }

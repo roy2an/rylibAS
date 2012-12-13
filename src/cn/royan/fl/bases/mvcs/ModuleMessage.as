@@ -17,5 +17,10 @@ package cn.royan.fl.bases.mvcs
 		public function writeMessageValue(type:*):void
 		{
 		}
+		
+		public function serialize():void
+		{
+			
+		}
 	}
 }

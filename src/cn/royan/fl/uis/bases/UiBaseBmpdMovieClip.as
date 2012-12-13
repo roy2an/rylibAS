@@ -2,6 +2,7 @@ package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
@@ -36,6 +37,7 @@ package cn.royan.fl.uis.bases
 			bgTextures = new Vector.<UninteractiveUiBase>(frames);
 			loop = true;
 			autoPlay = auto;
+			sequence = true;
 			
 			var frameWidth:int = bgTexture.width / row;
 			var frameHeight:int = bgTexture.height / column;
@@ -88,7 +90,9 @@ package cn.royan.fl.uis.bases
 		
 		protected function timerHandler(evt:TimerEvent):void
 		{
-			if( getChildAt(0) ) removeChildAt(0);
+			while(numChildren){
+				removeChildAt(0);
+			}
 			
 			if( sequence )
 			{
@@ -112,8 +116,11 @@ package cn.royan.fl.uis.bases
 			if( bgTextures[current-1] )
 				addChild(bgTextures[current-1]);
 			
-			if( current == toFrame && !loop )
+			if( current == toFrame && !loop ){
+				if( callbacks && callbacks['done'] ) callbacks['done']();
+				else dispatchEvent(new DatasEvent(DatasEvent.DATA_DONE));
 				timer.stop();
+			}
 		}
 		
 		public function getIn():void
@@ -133,6 +140,7 @@ package cn.royan.fl.uis.bases
 		
 		public function jumpTo(to:int):void
 		{
+			loop = false;
 			if( getChildAt(0) ) removeChildAt(0);
 			
 			current = to;

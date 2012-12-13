@@ -14,7 +14,6 @@ package cn.royan.fl.resources
 	import flash.display.Loader;
 	import flash.display.Stage;
 	import flash.utils.ByteArray;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.setTimeout;
 	import flash.xml.XMLDocument;
 

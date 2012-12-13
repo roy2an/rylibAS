@@ -6,5 +6,6 @@ package cn.royan.fl.interfaces.services
 	{
 		function writeMessageType(type:int):void;
 		function writeMessageValue(type:*):void;
+		function serialize():void;
 	}
 }
