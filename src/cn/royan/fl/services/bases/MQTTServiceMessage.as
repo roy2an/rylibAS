@@ -68,7 +68,7 @@ package cn.royan.fl.services.bases
 			writeMessageType(type + (dup << 3) + (qos << 1) + retain);
 		}
 		
-		public function readyType():uint
+		public function readType():uint
 		{
 			this.position=0;
 			return this.readUnsignedByte() & 0xF0;
@@ -80,13 +80,13 @@ package cn.royan.fl.services.bases
 			return this.readUnsignedByte() >> 3 & 0x01;
 		}
 		
-		public function readyQoS():uint
+		public function readQoS():uint
 		{
 			this.position=0;
 			return this.readUnsignedByte() >> 1 & 0x03;
 		}
 		
-		public function readyRETAIN():uint
+		public function readRETAIN():uint
 		{
 			this.position=0;
 			return this.readUnsignedByte() & 0x01;
@@ -108,7 +108,7 @@ package cn.royan.fl.services.bases
 			this.position = 0;
 			this.writeByte(value);
 			this.writeByte(remainingLength);
-			this.readBytes(fixHead,0,2);
+			this.readBytes(fixHead);
 			
 			type = value & 0xF0;
 			dup = (value >> 3) & 0x01;
@@ -141,10 +141,10 @@ package cn.royan.fl.services.bases
 		
 		public function serialize():void
 		{
-			type 	= this.readyType();
+			type 	= this.readType();
 			dup 	= this.readDUP();
-			qos 	= this.readyQoS();
-			retain	= this.readyRETAIN();
+			qos 	= this.readQoS();
+			retain	= this.readRETAIN();
 			
 			fixHead = PoolMap.getInstanceByType(ByteArray);
 			varHead = PoolMap.getInstanceByType(ByteArray);
@@ -174,10 +174,10 @@ package cn.royan.fl.services.bases
 					this.readBytes(varHead, 0 , 2);
 					this.readBytes(payLoad);
 					
-					remainingLength = payLoad.length;
+					remainingLength = varHead.length + payLoad.length;
 					break;
 				default://Remaining Length is the length of the variable header (2 bytes)
-					this.readBytes(varHead, 0 , 2);
+					this.readBytes(varHead, 0);
 					
 					remainingLength = varHead.length;
 					break;
