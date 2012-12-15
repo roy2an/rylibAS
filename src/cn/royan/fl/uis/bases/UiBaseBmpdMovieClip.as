@@ -1,6 +1,7 @@
 package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.bases.TimerBase;
 	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
@@ -11,15 +12,13 @@ package cn.royan.fl.uis.bases
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
-	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.utils.Timer;
 	
 	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IUiPlayBase
 	{
 		protected var bgTextures:Vector.<UninteractiveUiBase>;
-		protected var timer:Timer;
+		protected var timer:TimerBase;
 		protected var current:int;
 		protected var total:int;
 		protected var toFrame:int;
@@ -69,8 +68,7 @@ package cn.royan.fl.uis.bases
 			PoolMap.disposeInstance(rectangle);
 			PoolMap.disposeInstance(point);
 			
-			timer = PoolMap.getInstanceByType(Timer, 1000 / rate);
-			timer.addEventListener(TimerEvent.TIMER, timerHandler);
+			timer = PoolMap.getInstanceByType(TimerBase, 1000 / rate, timerHandler);
 			
 			if( bgTextures[current-1] )
 				addChild(bgTextures[current-1]);
@@ -88,7 +86,7 @@ package cn.royan.fl.uis.bases
 			
 		}
 		
-		protected function timerHandler(evt:TimerEvent):void
+		protected function timerHandler():void
 		{
 			while(numChildren){
 				removeChildAt(0);
@@ -190,8 +188,7 @@ package cn.royan.fl.uis.bases
 		{
 			super.removeFromStageHandler(evt);
 			
-			if( timer && timer.hasEventListener(TimerEvent.TIMER) )
-				timer.removeEventListener(TimerEvent.TIMER, timerHandler);
+			if( timer ) timer.stop();
 		}
 	}
 }

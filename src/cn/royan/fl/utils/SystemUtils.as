@@ -7,6 +7,7 @@ package cn.royan.fl.utils
 	import flash.system.LoaderContext;
 	import flash.system.System;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.getTimer;
 
 	public class SystemUtils
 	{
@@ -17,7 +18,7 @@ package cn.royan.fl.utils
 		
 		public static function print(...args):void
 		{
-			if( showDebug ) trace(args);
+			if( showDebug ) trace(getTimer() +"|"+ args);
 		}
 		
 		public static function createUniqueID():String
