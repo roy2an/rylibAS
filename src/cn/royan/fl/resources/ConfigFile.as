@@ -4,9 +4,7 @@ package cn.royan.fl.resources
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
-	import flash.net.URLVariables;
 	import flash.system.System;
-	import flash.utils.describeType;
 	import flash.xml.XMLDocument;
 	import flash.xml.XMLNode;
 

@@ -1,22 +1,22 @@
 package cn.royan.fl.uis
 {
-	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.interfaces.uis.IUiBase;
-	import cn.royan.fl.utils.SystemUtils;
-	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.GradientType;
 	import flash.display.Shape;
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
+	
+	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.interfaces.uis.IUiBase;
 
 	public class UninteractiveUiBase extends Shape implements IUiBase
 	{
 		protected var bgColors:Array;
 		protected var bgAlphas:Array;
 		protected var bgTexture:BitmapData;
+		protected var bitmap:Bitmap;
 		protected var containerWidth:Number;
 		protected var containerHeight:Number;
 		protected var matrix:Matrix;

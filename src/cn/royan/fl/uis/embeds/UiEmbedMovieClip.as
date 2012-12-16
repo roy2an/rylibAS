@@ -1,7 +1,6 @@
 package cn.royan.fl.uis.embeds
 {
 	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.utils.SystemUtils;
 	

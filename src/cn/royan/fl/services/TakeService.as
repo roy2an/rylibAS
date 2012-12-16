@@ -16,8 +16,6 @@ package cn.royan.fl.services
 	import flash.net.URLRequestMethod;
 	import flash.net.URLStream;
 	import flash.net.URLVariables;
-	import flash.system.ApplicationDomain;
-	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
 	public class TakeService extends DispacherBase implements IServiceBase

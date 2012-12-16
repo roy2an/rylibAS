@@ -2,12 +2,8 @@ package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
-	import cn.royan.fl.interfaces.uis.IUiTextBase;
-	import cn.royan.fl.uis.InteractiveUiBase;
 	
-	import flash.display.BitmapData;
 	import flash.events.Event;
-	import flash.text.TextField;
 	import flash.text.TextFieldType;
 	import flash.text.TextFormat;
 	

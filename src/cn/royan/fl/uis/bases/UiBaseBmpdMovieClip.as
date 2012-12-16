@@ -1,19 +1,17 @@
 package cn.royan.fl.uis.bases
 {
+	import flash.display.BitmapData;
+	import flash.events.Event;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.TimerBase;
-	import cn.royan.fl.bases.WeakMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
 	import cn.royan.fl.utils.SystemUtils;
-	
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.events.Event;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	
 	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IUiPlayBase
 	{
@@ -22,53 +20,77 @@ package cn.royan.fl.uis.bases
 		protected var current:int;
 		protected var total:int;
 		protected var toFrame:int;
+		protected var frameRate:int;
 		protected var sequence:Boolean;
 		protected var loop:Boolean;
 		protected var autoPlay:Boolean;
 		
-		public function UiBaseBmpdMovieClip(texture:BitmapData, row:int = 1, column:int = 1, frames:int = 1, rate:int = 10, auto:Boolean = true)
+		public function UiBaseBmpdMovieClip(texture:Object, rate:int = 10, auto:Boolean = true, row:int = 1, column:int = 1, frames:int = 1)
 		{
-			super(texture);
+			super(texture is BitmapData?texture:null);
 			
-			current = 1;
-			total = frames;
-			toFrame = 0;
-			bgTextures = new Vector.<UninteractiveUiBase>(frames);
+			var bmpd:BitmapData;
+			var frameunit:UninteractiveUiBase;
+			
+			if( texture is BitmapData ){
+				total = frames;
+				
+				bgTextures = new Vector.<UninteractiveUiBase>(total);
+				
+				var frameWidth:int = bgTexture.width / row;
+				var frameHeight:int = bgTexture.height / column;
+				
+				setSize(frameWidth, frameHeight);
+				
+				var i:int;
+				var rectangle:Rectangle = PoolMap.getInstanceByType(Rectangle);
+					rectangle.width = frameWidth;
+					rectangle.height = frameHeight;
+				var point:Point = PoolMap.getInstanceByType(Point);
+				var curRow:int;
+				var curCol:int;
+				
+				for(i = 0; i < total; i++){
+					curRow = i % row;
+					curCol = i / row;
+					
+					rectangle.x = curRow * frameWidth;
+					rectangle.y = curCol * frameHeight;
+					
+					bmpd = PoolMap.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
+					bmpd.copyPixels( bgTexture, rectangle, point );
+					frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
+					frameunit.setTexture(bmpd);
+					
+					bgTextures[i] = frameunit;
+				}
+				
+				PoolMap.disposeInstance(rectangle);
+				PoolMap.disposeInstance(point);
+			}else if( texture is Vector.<UninteractiveUiBase>){
+				total = (texture as Vector.<UninteractiveUiBase>).length;
+				bgTextures = new Vector.<UninteractiveUiBase>(total);
+				
+				for(i = 0; i < total; i++){
+					bmpd = (texture as Vector.<UninteractiveUiBase>)[i].getTexture();
+					
+					frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
+					frameunit.setTexture(bmpd);
+					
+					bgTextures[i] = frameunit;
+				}
+			}else{
+				throw new Error("texture is wrong type(BitmapData or Vector.<UninteractiveUiBase>)");
+			}
+			
 			loop = true;
 			autoPlay = auto;
 			sequence = true;
+			current = 1;
+			toFrame = 0;
+			frameRate = rate;
 			
-			var frameWidth:int = bgTexture.width / row;
-			var frameHeight:int = bgTexture.height / column;
-			
-			setSize(frameWidth, frameHeight);
-			
-			var i:int;
-			var frameunit:UninteractiveUiBase;
-			var rectangle:Rectangle = PoolMap.getInstanceByType(Rectangle);
-				rectangle.width = frameWidth;
-				rectangle.height = frameHeight;
-			var point:Point = PoolMap.getInstanceByType(Point);
-			for(i = 0; i < frames; i++){
-				var curRow:int = i % row;
-				var curCol:int = i / row;
-				var bmpd:BitmapData;
-				
-				rectangle.x = curRow * frameWidth;
-				rectangle.y = curCol * frameHeight
-				
-				bmpd = PoolMap.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
-				bmpd.copyPixels( bgTexture, rectangle, point );
-				frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
-				frameunit.setTexture(bmpd);
-				
-				bgTextures[i] = frameunit;
-			}
-			
-			PoolMap.disposeInstance(rectangle);
-			PoolMap.disposeInstance(point);
-			
-			timer = PoolMap.getInstanceByType(TimerBase, 1000 / rate, timerHandler);
+			timer = PoolMap.getInstanceByType(TimerBase, 1000 / frameRate, timerHandler);
 			
 			if( bgTextures[current-1] )
 				addChild(bgTextures[current-1]);
@@ -82,6 +104,31 @@ package cn.royan.fl.uis.bases
 		}
 		
 		override public function draw():void
+		{
+			
+		}
+		
+		public function clone():UiBaseBmpdMovieClip
+		{
+			return new UiBaseBmpdMovieClip(bgTextures, frameRate, autoPlay);
+		}
+		
+		public function addFrame():void
+		{
+			
+		}
+		
+		public function addFrameAt(index:int):void
+		{
+			
+		}
+		
+		public function removeFrame():void
+		{
+			
+		}
+		
+		public function removeFrameAt(index:int):void
 		{
 			
 		}

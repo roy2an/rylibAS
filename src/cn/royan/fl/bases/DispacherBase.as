@@ -1,7 +1,6 @@
 package cn.royan.fl.bases
 {
 	import flash.events.EventDispatcher;
-	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
 	public class DispacherBase extends EventDispatcher

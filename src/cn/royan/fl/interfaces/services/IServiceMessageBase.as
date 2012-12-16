@@ -1,7 +1,5 @@
 package cn.royan.fl.interfaces.services
 {
-	import flash.utils.ByteArray;
-
 	public interface IServiceMessageBase
 	{
 		function writeMessageType(type:int):void;

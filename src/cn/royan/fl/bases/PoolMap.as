@@ -1,11 +1,8 @@
 package cn.royan.fl.bases
 {
-	import avmplus.getQualifiedClassName;
-	
-	import cn.royan.fl.utils.SystemUtils;
-	
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
 
 	public class PoolMap
 	{

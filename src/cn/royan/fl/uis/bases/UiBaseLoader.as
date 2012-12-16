@@ -4,7 +4,6 @@ package cn.royan.fl.uis.bases
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
-	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;

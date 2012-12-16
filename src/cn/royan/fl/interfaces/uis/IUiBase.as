@@ -24,6 +24,5 @@ package cn.royan.fl.interfaces.uis
 		function setTexture(value:BitmapData, frames:uint=1):void;
 		function getTexture():BitmapData;
 		function getDispatcher():EventDispatcher;
-//		function setEnabled(value:Boolean):void;
 	}
 }

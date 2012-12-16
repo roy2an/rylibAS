@@ -1,7 +1,5 @@
 package cn.royan.fl.bases
 {
-	import cn.royan.fl.utils.SystemUtils;
-	
 	import flash.utils.Dictionary;
 	
 	public class WeakMap

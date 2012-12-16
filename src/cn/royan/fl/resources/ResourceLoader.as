@@ -3,19 +3,13 @@ package cn.royan.fl.resources
 	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
-	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.services.TakeService;
 	import cn.royan.fl.uis.embeds.UiEmbedLoader;
 	import cn.royan.fl.utils.SystemUtils;
 	
-	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
-	import flash.display.Loader;
-	import flash.display.Stage;
-	import flash.utils.ByteArray;
 	import flash.utils.setTimeout;
-	import flash.xml.XMLDocument;
 
 	public class ResourceLoader extends DispacherBase implements IDisposeBase
 	{

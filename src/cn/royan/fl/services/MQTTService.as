@@ -4,7 +4,6 @@ package cn.royan.fl.services
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
-	import flash.events.TimerEvent;
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	

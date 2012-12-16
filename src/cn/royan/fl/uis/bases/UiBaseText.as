@@ -1,6 +1,5 @@
 package cn.royan.fl.uis.bases
 {
-	
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.uis.IUiTextBase;
 	import cn.royan.fl.uis.InteractiveUiBase;

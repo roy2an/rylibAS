@@ -1,7 +1,6 @@
 package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiSelectBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;

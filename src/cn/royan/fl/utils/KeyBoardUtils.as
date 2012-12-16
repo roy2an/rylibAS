@@ -1,6 +1,5 @@
 package cn.royan.fl.utils
 {
-	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.display.DisplayObject;
 	/**
