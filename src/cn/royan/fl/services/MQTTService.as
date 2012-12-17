@@ -172,7 +172,7 @@ package cn.royan.fl.services
 		protected function subscribe(topics:Array, qoss:Array, qos:int = 0):void
 		{
 			var bytes:ByteArray = new ByteArray()//PoolMap.getInstanceByType(ByteArray);
-			
+			if( qos ) msgid++;
 				bytes.writeByte(msgid >> 8);
 				bytes.writeByte(msgid % 256);
 			
@@ -202,7 +202,7 @@ package cn.royan.fl.services
 		{
 			
 			var bytes:ByteArray = new ByteArray()//PoolMap.getInstanceByType(ByteArray);
-				
+			if( qos ) msgid++;
 				bytes.writeByte(msgid >> 8);
 				bytes.writeByte(msgid % 256);
 			var i:int;
@@ -273,11 +273,7 @@ package cn.royan.fl.services
 			SystemUtils.print( "[Class MQTTService]:Socket received " + socket.bytesAvailable + " byte(s) of data:");
 			while( socket.bytesAvailable ){
 				packet = PoolMap.getInstanceByType(MQTTServiceMessage);
-				packet.writeType(socket.readUnsignedByte());
-				var remainingLength:uint = socket.readUnsignedByte();
-				var bytes:ByteArray = new ByteArray();
-				socket.readBytes(bytes, 0, remainingLength);
-				packet.writeMessageValue(bytes);
+				packet.writeMessageFromBytes(socket);
 				
 				SystemUtils.print("Protocol Type:"+ packet.readType().toString(16));
 				SystemUtils.print("Protocol Length:"+ packet.length);

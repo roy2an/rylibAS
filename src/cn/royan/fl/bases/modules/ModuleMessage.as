@@ -1,5 +1,7 @@
-package cn.royan.fl.bases.mvcs
+package cn.royan.fl.bases.modules
 {
+	import flash.utils.IDataInput;
+	
 	import cn.royan.fl.interfaces.services.IServiceMessageBase;
 	
 	public class ModuleMessage implements IServiceMessageBase
@@ -14,8 +16,13 @@ package cn.royan.fl.bases.mvcs
 		{
 		}
 		
-		public function writeMessageValue(type:*):void
+		public function writeMessageValue(value:*):void
 		{
+		}
+		
+		public function writeMessageFromBytes(input:IDataInput):void
+		{
+			
 		}
 		
 		public function serialize():void

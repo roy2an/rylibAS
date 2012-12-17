@@ -1,9 +1,10 @@
 package cn.royan.fl.services.bases
 {
+	import flash.utils.ByteArray;
+	import flash.utils.IDataInput;
+	
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.services.IServiceMessageBase;
-	
-	import flash.utils.ByteArray;
 	
 	public class MQTTServiceMessage extends ByteArray implements IServiceMessageBase
 	{
@@ -121,6 +122,20 @@ package cn.royan.fl.services.bases
 			this.position = 2;
 			this.writeBytes(value);
 			this.serialize();
+			
+			writeMessageType( type + (dup << 3) + (qos << 1) + retain );
+		}
+		
+		public function writeMessageFromBytes(input:IDataInput):void
+		{
+			this.position = 0;
+			this.writeType(input.readUnsignedByte());
+			
+			remainingLength = input.readUnsignedByte();
+			
+			input.readBytes(this, 2, remainingLength);
+			this.serialize();
+			
 			writeMessageType( type + (dup << 3) + (qos << 1) + retain );
 		}
 		
@@ -163,7 +178,8 @@ package cn.royan.fl.services.bases
 					break;
 				case PUBLISH://Remaining Length is the length of the variable header plus the length of the payload
 					var index:int = (this.readUnsignedByte() << 8) + this.readUnsignedByte();//the length of variable header
-					this.readBytes(varHead, 0 , index);
+					this.position = 2;
+					this.readBytes(varHead, 0 , index + 4);
 					this.readBytes(payLoad);
 					
 					remainingLength = varHead.length + payLoad.length;

@@ -130,6 +130,10 @@ package cn.royan.fl.uis
 					graphics.beginFill( bgColors[0], bgAlphas[0] );
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
+				}else{
+					graphics.beginFill( 0xFFFFFF, .1 );
+					graphics.drawRect( 0, 0, containerWidth, containerHeight );
+					graphics.endFill();
 				}
 			}
 		}

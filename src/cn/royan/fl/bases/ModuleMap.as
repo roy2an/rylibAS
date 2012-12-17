@@ -1,9 +1,10 @@
-package cn.royan.fl.bases.mvcs
+package cn.royan.fl.bases
 {
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.interfaces.services.IServiceMessageBase;
 	
 	import flash.utils.Dictionary;
+	import cn.royan.fl.bases.modules.ModuleMessage;
 	
 	public class ModuleMap implements IDisposeBase
 	{

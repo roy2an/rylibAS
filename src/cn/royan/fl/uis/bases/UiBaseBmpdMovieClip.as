@@ -1,5 +1,6 @@
 package cn.royan.fl.uis.bases
 {
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.geom.Point;
@@ -15,7 +16,7 @@ package cn.royan.fl.uis.bases
 	
 	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IUiPlayBase
 	{
-		protected var bgTextures:Vector.<UninteractiveUiBase>;
+		protected var bgTextures:Vector.<BitmapData>;
 		protected var timer:TimerBase;
 		protected var current:int;
 		protected var total:int;
@@ -24,6 +25,7 @@ package cn.royan.fl.uis.bases
 		protected var sequence:Boolean;
 		protected var loop:Boolean;
 		protected var autoPlay:Boolean;
+		protected var currentFrame:Bitmap;
 		
 		public function UiBaseBmpdMovieClip(texture:Object, rate:int = 10, auto:Boolean = true, row:int = 1, column:int = 1, frames:int = 1)
 		{
@@ -35,7 +37,7 @@ package cn.royan.fl.uis.bases
 			if( texture is BitmapData ){
 				total = frames;
 				
-				bgTextures = new Vector.<UninteractiveUiBase>(total);
+				bgTextures = new Vector.<BitmapData>(total);
 				
 				var frameWidth:int = bgTexture.width / row;
 				var frameHeight:int = bgTexture.height / column;
@@ -59,28 +61,17 @@ package cn.royan.fl.uis.bases
 					
 					bmpd = PoolMap.getInstanceByType(BitmapData, frameWidth, frameHeight, true);
 					bmpd.copyPixels( bgTexture, rectangle, point );
-					frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
-					frameunit.setTexture(bmpd);
 					
-					bgTextures[i] = frameunit;
+					bgTextures[i] = bmpd;
 				}
 				
 				PoolMap.disposeInstance(rectangle);
 				PoolMap.disposeInstance(point);
-			}else if( texture is Vector.<UninteractiveUiBase>){
-				total = (texture as Vector.<UninteractiveUiBase>).length;
-				bgTextures = new Vector.<UninteractiveUiBase>(total);
-				
-				for(i = 0; i < total; i++){
-					bmpd = (texture as Vector.<UninteractiveUiBase>)[i].getTexture();
-					
-					frameunit = PoolMap.getInstanceByType(UninteractiveUiBase);
-					frameunit.setTexture(bmpd);
-					
-					bgTextures[i] = frameunit;
-				}
+			}else if( texture is Vector.<BitmapData>){
+				total = (texture as Vector.<BitmapData>).length;
+				bgTextures = texture as Vector.<BitmapData>;
 			}else{
-				throw new Error("texture is wrong type(BitmapData or Vector.<UninteractiveUiBase>)");
+				throw new Error("texture is wrong type(BitmapData or Vector.<BitmapData>)");
 			}
 			
 			loop = true;
@@ -92,8 +83,14 @@ package cn.royan.fl.uis.bases
 			
 			timer = PoolMap.getInstanceByType(TimerBase, 1000 / frameRate, timerHandler);
 			
+			currentFrame = PoolMap.getInstanceByType( Bitmap );
+			
 			if( bgTextures[current-1] )
-				addChild(bgTextures[current-1]);
+				currentFrame.bitmapData = bgTextures[current - 1];
+			
+			addChild(currentFrame);
+			
+			SystemUtils.print("Finish");
 		}
 		
 		override protected function addToStageHandler(evt:Event = null):void
@@ -135,10 +132,6 @@ package cn.royan.fl.uis.bases
 		
 		protected function timerHandler():void
 		{
-			while(numChildren){
-				removeChildAt(0);
-			}
-			
 			if( sequence )
 			{
 				current++;
@@ -158,8 +151,7 @@ package cn.royan.fl.uis.bases
 				}
 			}
 			
-			if( bgTextures[current-1] )
-				addChild(bgTextures[current-1]);
+			currentFrame.bitmapData = bgTextures[current - 1];
 			
 			if( current == toFrame && !loop ){
 				if( callbacks && callbacks['done'] ) callbacks['done']();
@@ -186,12 +178,10 @@ package cn.royan.fl.uis.bases
 		public function jumpTo(to:int):void
 		{
 			loop = false;
-			if( getChildAt(0) ) removeChildAt(0);
 			
 			current = to;
 			
-			if(bgTextures[current-1])
-				addChild(bgTextures[current-1]);
+			currentFrame.bitmapData = bgTextures[current - 1];
 		}
 		
 		public function goFromTo(from:int, to:int):void
@@ -204,10 +194,7 @@ package cn.royan.fl.uis.bases
 			current = from;
 			toFrame = to;
 			
-			if( getChildAt(0) ) removeChildAt(0);
-			
-			if(bgTextures[current-1])
-				addChild(bgTextures[current-1]);
+			currentFrame.bitmapData = bgTextures[current - 1];
 			
 			timer.start();
 		}
