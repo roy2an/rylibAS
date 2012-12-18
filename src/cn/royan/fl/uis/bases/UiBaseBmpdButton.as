@@ -1,16 +1,16 @@
 package cn.royan.fl.uis.bases
 {
+	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.interfaces.uis.IUiSelectBase;
+	import cn.royan.fl.uis.InteractiveUiBase;
+	import cn.royan.fl.utils.SystemUtils;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
-	import cn.royan.fl.bases.PoolMap;
-	import cn.royan.fl.interfaces.uis.IUiSelectBase;
-	import cn.royan.fl.uis.InteractiveUiBase;
-	import cn.royan.fl.utils.SystemUtils;
 	
 	public class UiBaseBmpdButton extends InteractiveUiBase implements IUiSelectBase
 	{
@@ -19,17 +19,14 @@ package cn.royan.fl.uis.bases
 		protected var total:int;
 		protected var isInGroup:Boolean;
 		
-		public function UiBaseBmpdButton(texture:Object = null, frames:uint = 5)
+		public function UiBaseBmpdButton(texture:Object, frames:uint = 5)
 		{
-			super(texture is BitmapData?texture:null);
+			super(texture is BitmapData?texture as BitmapData:null);
 			
 			if( texture is BitmapData ){
 				total = frames;
-				
 				bgTextures = new Vector.<BitmapData>(total);
-				
 				drawTextures();
-				
 			}else if( texture is Vector.<BitmapData>){
 				total = (texture as Vector.<BitmapData>).length;
 				bgTextures = texture as Vector.<BitmapData>;

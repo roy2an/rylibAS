@@ -1,10 +1,10 @@
 package cn.royan.fl.services.bases
 {
-	import flash.utils.ByteArray;
-	import flash.utils.IDataInput;
-	
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.interfaces.services.IServiceMessageBase;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.IDataInput;
 	
 	public class MQTTServiceMessage extends ByteArray implements IServiceMessageBase
 	{
@@ -139,12 +139,12 @@ package cn.royan.fl.services.bases
 			writeMessageType( type + (dup << 3) + (qos << 1) + retain );
 		}
 		
-		public function readMessageType():ByteArray
+		public function readMessageType():int
 		{
-			return fixHead;
+			return this.readType();
 		}
 		
-		public function readMessageValue():ByteArray
+		public function readMessageValue():*
 		{
 			return varHead;
 		}
@@ -198,6 +198,17 @@ package cn.royan.fl.services.bases
 					remainingLength = varHead.length;
 					break;
 			}
+		}
+		
+		public function dispose():void
+		{
+			fixHead.length = 0;
+			varHead.length = 0;
+			payLoad.length = 0;
+			
+			PoolMap.disposeInstance( fixHead );
+			PoolMap.disposeInstance( varHead );
+			PoolMap.disposeInstance( payLoad );
 		}
 	}
 }

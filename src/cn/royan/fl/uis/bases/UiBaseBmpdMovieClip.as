@@ -1,11 +1,5 @@
 package cn.royan.fl.uis.bases
 {
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.events.Event;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.TimerBase;
 	import cn.royan.fl.events.DatasEvent;
@@ -13,6 +7,12 @@ package cn.royan.fl.uis.bases
 	import cn.royan.fl.uis.InteractiveUiBase;
 	import cn.royan.fl.uis.UninteractiveUiBase;
 	import cn.royan.fl.utils.SystemUtils;
+	
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.events.Event;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	public class UiBaseBmpdMovieClip extends InteractiveUiBase implements IUiPlayBase
 	{
@@ -29,7 +29,7 @@ package cn.royan.fl.uis.bases
 		
 		public function UiBaseBmpdMovieClip(texture:Object, rate:int = 10, auto:Boolean = true, row:int = 1, column:int = 1, frames:int = 1)
 		{
-			super(texture is BitmapData?texture:null);
+			super(texture is BitmapData?texture as BitmapData:null);
 			
 			var bmpd:BitmapData;
 			var frameunit:UninteractiveUiBase;

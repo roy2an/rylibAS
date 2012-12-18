@@ -4,6 +4,7 @@ package cn.royan.fl.services
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.services.IServiceBase;
+	import cn.royan.fl.services.bases.SoktServiceMessage;
 	import cn.royan.fl.utils.SystemUtils;
 	
 	import flash.events.Event;
@@ -21,10 +22,15 @@ package cn.royan.fl.services
 		protected var port:int;
 		
 		protected var socket:Socket;
-		protected var packet:ByteArray;
+		protected var packet:SoktServiceMessage;
+		protected var packetType:Class;
 		
-		public function SoktService()
+		public function SoktService(messageType:Class, host:String="", port:int=0)
 		{
+			packetType = messageType;
+			
+			this.host = host;
+			this.port = port;
 		}
 		
 		public function sendRequest(url:String="", extra:*=null):void
@@ -119,12 +125,16 @@ package cn.royan.fl.services
 		protected function onProgress(evt:ProgressEvent):void
 		{
 			SystemUtils.print("[Class SoktService]:onProgress");
-			packet = PoolMap.getInstanceByType( ByteArray );
-			
-			socket.readBytes(packet);
-			if( callbacks && callbacks['doing'] ) callbacks['doing']( packet );
-			else dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, packet));
-			PoolMap.disposeInstance(packet);
+			while(socket.bytesAvailable){
+				packet = SystemUtils.getInstanceByClassName(packetType.toString());
+				packet.writeMessageFromBytes(socket);
+				
+				if( callbacks && callbacks['doing'] ) callbacks['doing']( packet );
+				else dispatchEvent(new DatasEvent(DatasEvent.DATA_DOING, packet));
+				
+				packet.length = 0;
+				PoolMap.disposeInstance(packet);
+			}
 		}
 	}
 }

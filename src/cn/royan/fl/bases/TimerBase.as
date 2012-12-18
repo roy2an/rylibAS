@@ -6,12 +6,14 @@ package cn.royan.fl.bases
 
 	public class TimerBase
 	{
+		public static const TIMERBASE_DELAY:int = 10;
+		
 		private static var timerlists:Vector.<TimerBase> = new Vector.<TimerBase>();
-		private static var timer:Timer = new Timer(50);
+		private static var timer:Timer = new Timer(TIMERBASE_DELAY);
 		
-		public var current:uint;
-		
-		protected var delay:uint;
+		protected var current:int;
+		protected var last:int;
+		protected var delay:int;
 		protected var callback:Function;
 		protected var isStart:Boolean;
 		
@@ -39,13 +41,19 @@ package cn.royan.fl.bases
 		
 		public function needRender():Boolean
 		{
-			return isStart && (getTimer() - current) >= delay;
+			if( !isStart ) return false;
+			current -= (getTimer() - last);
+			last = getTimer();
+			var isInit:Boolean = current < TIMERBASE_DELAY;
+			if( isInit ) current = delay;
+			return isStart && isInit;
 		}
 		
 		public function start():void
 		{
 			isStart = true;
-			current = getTimer();
+			last = getTimer();
+			current = delay;
 			
 			if( !timer.running ){
 				if( !timer.hasEventListener(TimerEvent.TIMER) ) timer.addEventListener(TimerEvent.TIMER, timerHandler);
@@ -70,7 +78,6 @@ package cn.royan.fl.bases
 		{
 			for each( var time:TimerBase in timerlists ){
 				if( time.needRender() ){
-					time.current = getTimer();
 					time.getCallback()();
 				}
 			}
