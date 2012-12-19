@@ -184,9 +184,9 @@ package cn.royan.fl.services.bases
 					
 					remainingLength = varHead.length + payLoad.length;
 					break;
-				case SUBSCRIBE://Remaining Length is the length of the payload
-				case SUBACK://Remaining Length is the length of the payload
-				case UNSUBSCRIBE://Remaining Length is the length of the payload
+				case SUBSCRIBE://Remaining Length is the length of the variable header plus the length of the payload
+				case SUBACK://Remaining Length is the length of the variable header plus the length of the payload
+				case UNSUBSCRIBE://Remaining Length is the length of the variable header plus the length of the payload
 					this.readBytes(varHead, 0 , 2);
 					this.readBytes(payLoad);
 					

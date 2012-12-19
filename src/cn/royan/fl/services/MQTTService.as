@@ -1,12 +1,5 @@
 package cn.royan.fl.services
 {
-	import flash.events.Event;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.SecurityErrorEvent;
-	import flash.net.Socket;
-	import flash.utils.ByteArray;
-	
 	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.TimerBase;
@@ -15,17 +8,18 @@ package cn.royan.fl.services
 	import cn.royan.fl.services.bases.MQTTServiceMessage;
 	import cn.royan.fl.utils.SystemUtils;
 	
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.net.Socket;
+	import flash.utils.ByteArray;
+	
 	public class MQTTService extends DispacherBase implements IServiceBase
 	{
-		private static const MAX_LEN_UUID:int		= 16;
-		private static const MAX_LEN_TOPIC:int		= 7;
-		private static const MAX_LEN_USERNAME:int	= 12;
-		//Topic level separator
-		public static const TOPIC_LEVEL_SEPARATOR:String = "/";
-		//Multi-level wildcard
-		public static const TOPIC_M_LEVEL_WILDCARD:String = "#";
-		//Single-level wildcard
-		public static const TOPIC_S_LEVEL_WILDCARD:String = "+";
+		private static const MAX_LEN_UUID:int	= 23;
+		private static const MAX_LEN_USERNAME_AND_PASSWORD:int = 12;
+		private static const pattern:RegExp = /\/|\+|\#/;
 		
 		protected var keepalive:int = 10;
 		protected var host:String;
@@ -44,10 +38,13 @@ package cn.royan.fl.services
 		
 		public function MQTTService(host:String, port:uint, clientid:String)
 		{
+			if( clientid.length > MAX_LEN_UUID )
+				throw new Error("The Client Identifier (Client ID) is between 1 and 23 characters long");
+			
 			this.host = host;
 			this.port = port;
 			this.clientid = clientid;
-
+			
 			timer = PoolMap.getInstanceByType(TimerBase, keepalive / 2 * 1000, onPing);
 		}
 		
@@ -72,10 +69,16 @@ package cn.royan.fl.services
 				default:
 					extra = extra == null?{}:extra;
 					clean = extra.clean != false;
-					if( extra.username ) this.username = extra.username;
-					else this.username = "";
-					if( extra.password ) this.password = extra.password;
-					else this.password = "";
+					if( extra.username ){
+						if( extra.username.length > MAX_LEN_USERNAME_AND_PASSWORD )
+							throw new Error("user names are kept to 12 characters or fewer, but it is not required.");
+						this.username = extra.username;
+					}else this.username = "";
+					if( extra.password ){
+						if( extra.username.length > MAX_LEN_USERNAME_AND_PASSWORD )
+							throw new Error("passwords are kept to 12 characters or fewer, but it is not required.");
+						this.password = extra.password;
+					}else this.password = "";
 					if( extra.will ) this.will = extra.will;
 			}
 		}
@@ -99,7 +102,7 @@ package cn.royan.fl.services
 		public function close():void
 		{
 			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
-			mqttBytes.writeMessageType(MQTTServiceMessage.DISCONNECT);
+				mqttBytes.writeMessageType(MQTTServiceMessage.DISCONNECT);
 				
 			socket.writeBytes(mqttBytes);
 			socket.flush();
@@ -142,21 +145,25 @@ package cn.royan.fl.services
 		
 		protected function publish(topic:String, content:String, qos:int = 0, retain:int = 0):void
 		{
-			var bytes:ByteArray = new ByteArray();//PoolMap.getInstanceByType(ByteArray);
+			if (topic.search(pattern) != -1)
+				throw new Error("topics must not contain Topic wildcard characters.(/ # +)");
+			
+			var bytes:ByteArray = PoolMap.getInstanceByType(ByteArray);
 			writeString(bytes, topic);
 			
 			if( qos )
 			{
 				msgid++;
 				bytes.writeByte(msgid >> 8);
-				bytes.writeByte(msgid % 256 );
+				bytes.writeByte(msgid & 0xFF );
 			}
+			
 			writeString(bytes, content);
 			
 			var messageType:int = MQTTServiceMessage.PUBLISH;
 			if( qos ) messageType += qos << 1;
 			if( retain ) messageType += 1;
-			var mqttBytes:MQTTServiceMessage = new MQTTServiceMessage()//PoolMap.getInstanceByType(MQTTServiceMessage);
+			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
 				mqttBytes.writeMessageType(messageType);
 				mqttBytes.writeMessageValue(bytes);
 			
@@ -166,61 +173,74 @@ package cn.royan.fl.services
 			bytes.length = 0;
 			mqttBytes.length = 0;
 			
+			PoolMap.disposeInstance(bytes);
+			PoolMap.disposeInstance(mqttBytes);
+			
 			SystemUtils.print( "[Class MQTTService]:Publish sent" );
 		}
 		
 		protected function subscribe(topics:Array, qoss:Array, qos:int = 0):void
 		{
-			var bytes:ByteArray = new ByteArray()//PoolMap.getInstanceByType(ByteArray);
+			var bytes:ByteArray = PoolMap.getInstanceByType(ByteArray);
 			if( qos ) msgid++;
 				bytes.writeByte(msgid >> 8);
-				bytes.writeByte(msgid % 256);
+				bytes.writeByte(msgid & 0xFF);
 			
 			var i:int;
 			for(i = 0; i < topics.length; i++){
-				if (topics[i].length > MAX_LEN_TOPIC)
-					throw new Error("Out of range ".concat(MAX_LEN_TOPIC, "!"));
+				if (topics[i].search(pattern) != -1)
+					throw new Error("topics must not contain Topic wildcard characters.");
 				
 				writeString(bytes, topics[i]);
 				bytes.writeByte(qoss[i]);
 			}
-			//TODO:send subscribe message
+			
 			var messageType:int = MQTTServiceMessage.SUBSCRIBE;
 				messageType += (qos << 1);
-			var mqttBytes:MQTTServiceMessage = new MQTTServiceMessage()//PoolMap.getInstanceByType(MQTTServiceMessage);
+			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
 				mqttBytes.writeMessageType(messageType);
 				mqttBytes.writeMessageValue(bytes);
 			
-			//
 			socket.writeBytes(mqttBytes);
 			socket.flush();
+			
+			bytes.length = 0;
+			mqttBytes.length = 0;
+			
+			PoolMap.disposeInstance(bytes);
+			PoolMap.disposeInstance(mqttBytes);
 			
 			SystemUtils.print( "[Class MQTTService]:Subscribe sent" );
 		}
 		
 		protected function unsubscribe(topics:Array, qos:int = 0):void
 		{
-			
-			var bytes:ByteArray = new ByteArray()//PoolMap.getInstanceByType(ByteArray);
+			var bytes:ByteArray = PoolMap.getInstanceByType(ByteArray);
 			if( qos ) msgid++;
 				bytes.writeByte(msgid >> 8);
-				bytes.writeByte(msgid % 256);
+				bytes.writeByte(msgid & 0xFF);
 			var i:int;
 			for(i = 0; i < topics.length; i++){
-				if (topics[i].length > MAX_LEN_TOPIC)
-					throw new Error("Out of range ".concat(MAX_LEN_TOPIC, "!"));
+				if (topics[i].search(pattern) != -1)
+					throw new Error("topics must not contain Topic wildcard characters.");
 				
 				writeString(bytes, topics[i]);
 			}
-			//TODO:send subscribe message
+			
 			var messageType:int = MQTTServiceMessage.UNSUBSCRIBE;
 				messageType += (qos << 1);
-			var mqttBytes:MQTTServiceMessage = new MQTTServiceMessage()//PoolMap.getInstanceByType(MQTTServiceMessage);
+			var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
 				mqttBytes.writeMessageType(messageType);
 				mqttBytes.writeMessageValue(bytes);
-			//
+			
 			socket.writeBytes(mqttBytes);
 			socket.flush();
+			
+			bytes.length = 0;
+			mqttBytes.length = 0;
+			
+			PoolMap.disposeInstance(bytes);
+			PoolMap.disposeInstance(mqttBytes);
 			
 			SystemUtils.print( "[Class MQTTService]:Unsubscribe sent" );
 		}
@@ -245,11 +265,14 @@ package cn.royan.fl.services
 				type += will['qos'] << 3;
 				if( will['retain'] ) type += 32;
 			}
+			
 			if( username ) type += 128;
 			if( password ) type += 64;
-			bytes.writeByte(type); //Clean session only
-			bytes.writeByte(keepalive >> 8); //Keepalive MSB
-			bytes.writeByte(keepalive & 0xff); //Keepaliave LSB = 60
+			
+			bytes.writeByte(type); 				//Clean session only
+			bytes.writeByte(keepalive >> 8); 	//Keepalive MSB
+			bytes.writeByte(keepalive & 0xff); 	//Keepaliave LSB = 60
+			//payload
 			writeString(bytes, clientid);
 			writeString(bytes, username?username:"");
 			writeString(bytes, password?password:"");
@@ -259,6 +282,12 @@ package cn.royan.fl.services
 				
 			socket.writeBytes(mqttBytes);
 			socket.flush();
+			
+			bytes.length = 0;
+			mqttBytes.length = 0;
+			
+			PoolMap.disposeInstance(bytes);
+			PoolMap.disposeInstance(mqttBytes);
 		}
 		
 		protected function onIOError(evt:IOErrorEvent):void
@@ -287,6 +316,9 @@ package cn.royan.fl.services
 				switch(packet.readType()){
 					case MQTTServiceMessage.CONNACK:
 						onConnack(packet);
+						break;
+					case MQTTServiceMessage.PUBLISH:
+						onPublish(packet);
 						break;
 					case MQTTServiceMessage.PUBACK:
 						onPuback(packet);
@@ -375,6 +407,35 @@ package cn.royan.fl.services
 			}
 		}
 		
+		protected function onPublish(packet:MQTTServiceMessage):void
+		{
+			//Fixed header
+			switch(packet.readRemainingLength()){
+				case 0x02:
+					//Variable header
+					var varHead:ByteArray = packet.readMessageValue();
+					var messageId:uint = (varHead.readUnsignedByte() << 8) + varHead.readUnsignedByte();
+					SystemUtils.print("Puback Message ID "+messageId);
+					
+					//Actions
+					var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
+						mqttBytes.writeMessageType(MQTTServiceMessage.PUBREC);
+						mqttBytes.writeMessageValue(varHead);
+					//
+					socket.writeBytes(mqttBytes);
+					socket.flush();
+					
+					mqttBytes.length = 0;
+					
+					PoolMap.disposeInstance(mqttBytes);
+					break;
+				default:
+					break;
+			}
+			//Payload
+			
+		}
+		
 		protected function onPuback(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -384,15 +445,15 @@ package cn.royan.fl.services
 					var varHead:ByteArray = packet.readMessageValue();
 					var messageId:uint = (varHead.readUnsignedByte() << 8) + varHead.readUnsignedByte();
 					SystemUtils.print("Puback Message ID "+messageId);
+					
+					//Actions
 					break;
 				default:
 					break;
 			}
 			//Payload
-			//Actions
 		}
 		
-		//TODO:
 		protected function onPubrec(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -402,15 +463,26 @@ package cn.royan.fl.services
 					var varHead:ByteArray = packet.readMessageValue();
 					var messageId:uint = (varHead.readUnsignedByte() << 8) + varHead.readUnsignedByte();
 					SystemUtils.print("Pubrec Message ID "+messageId);
+					
+					//Actions
+					var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
+						mqttBytes.writeMessageType(MQTTServiceMessage.PUBREL);
+						mqttBytes.writeMessageValue(varHead);
+					//
+					socket.writeBytes(mqttBytes);
+					socket.flush();
+					
+					mqttBytes.length = 0;
+					
+					PoolMap.disposeInstance(mqttBytes);
 					break;
 				default:
 					break;
 			}
 			//Payload
-			//Actions
+			
 		}
 		
-		//TODO:
 		protected function onPubrel(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -420,15 +492,25 @@ package cn.royan.fl.services
 					var varHead:ByteArray = packet.readMessageValue();
 					var messageId:uint = (varHead.readUnsignedByte() << 8) + varHead.readUnsignedByte();
 					SystemUtils.print("Pubrel Message ID "+messageId);
+					
+					//Actions
+					var mqttBytes:MQTTServiceMessage = PoolMap.getInstanceByType(MQTTServiceMessage);
+					mqttBytes.writeMessageType(MQTTServiceMessage.PUBCOMP);
+					mqttBytes.writeMessageValue(varHead);
+					//
+					socket.writeBytes(mqttBytes);
+					socket.flush();
+					
+					mqttBytes.length = 0;
+					
+					PoolMap.disposeInstance(mqttBytes);
 					break;
 				default:
 					break;
 			}
 			//Payload
-			//Actions
 		}
 		
-		//TODO:
 		protected function onPubcomp(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -438,15 +520,15 @@ package cn.royan.fl.services
 					var varHead:ByteArray = packet.readMessageValue();
 					var messageId:uint = (varHead.readUnsignedByte() << 8) + varHead.readUnsignedByte();
 					SystemUtils.print("Pubcomp Message ID "+messageId);
+					
+					//Actions
 					break;
 				default:
 					break;
 			}
 			//Payload
-			//Actions
 		}
 		
-		//TODO:
 		protected function onSuback(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -465,7 +547,6 @@ package cn.royan.fl.services
 			//Actions
 		}
 		
-		//TODO:
 		protected function onUnsuback(packet:MQTTServiceMessage):void
 		{
 			//Fixed header
@@ -484,7 +565,6 @@ package cn.royan.fl.services
 			//Actions
 		}
 		
-		//TODO:
 		protected function onPingresp(packet:MQTTServiceMessage):void
 		{
 			//Only Fixed header
@@ -519,7 +599,7 @@ package cn.royan.fl.services
 		protected function onPing():void
 		{
 			var bytes:MQTTServiceMessage = new MQTTServiceMessage();
-			bytes.writeMessageType(MQTTServiceMessage.PINGREQ);
+				bytes.writeMessageType(MQTTServiceMessage.PINGREQ);
 			socket.writeBytes(bytes);
 			socket.flush();
 			SystemUtils.print("[Class MQTTService]:Ping sent");
@@ -529,7 +609,7 @@ package cn.royan.fl.services
 		{
 			var len:int = str.length;
 			var msb:int = len >>8;
-			var lsb:int = len % 256;
+			var lsb:int = len & 0xFF;
 			bytes.writeByte(msb);
 			bytes.writeByte(lsb);
 			bytes.writeMultiByte(str, 'utf-8');

@@ -1,9 +1,9 @@
 package cn.royan.fl.uis.bases
 {
-	import flash.display.DisplayObject;
-	
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
+	
+	import flash.display.DisplayObject;
 	
 	public class UiBaseContainer extends InteractiveUiBase
 	{
@@ -65,6 +65,13 @@ package cn.royan.fl.uis.bases
 			items.splice( index, 1);
 			
 			draw();
+		}
+		
+		public function removeAllItem():void
+		{
+			while( items.length ){
+				removeChild(items.shift());
+			}
 		}
 		
 		public function setHorizontalAlign(value:uint):void
@@ -144,6 +151,7 @@ package cn.royan.fl.uis.bases
 					//next row start
 					rowW = item.getSize()[0];
 					rowH = item.getSize()[1];
+					
 					itemNumber = 1;
 				}else {
 					rowW += ( (i > 0 ? 1:0) * gapX + item.getSize()[0]);

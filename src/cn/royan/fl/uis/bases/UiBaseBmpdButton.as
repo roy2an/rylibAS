@@ -30,6 +30,8 @@ package cn.royan.fl.uis.bases
 			}else if( texture is Vector.<BitmapData>){
 				total = (texture as Vector.<BitmapData>).length;
 				bgTextures = texture as Vector.<BitmapData>;
+				
+				setSize(bgTextures[0].width, bgTextures[0].height);
 			}else{
 				throw new Error("texture is wrong type(BitmapData or Vector.<BitmapData>)");
 			}
