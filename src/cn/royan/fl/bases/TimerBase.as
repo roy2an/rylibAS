@@ -1,10 +1,12 @@
 package cn.royan.fl.bases
 {
+	import cn.royan.fl.interfaces.IDisposeBase;
+	
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 
-	public class TimerBase
+	public class TimerBase implements IDisposeBase
 	{
 		public static const TIMERBASE_DELAY:int = 10;
 		

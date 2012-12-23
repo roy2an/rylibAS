@@ -16,11 +16,11 @@ package cn.royan.fl.uis
 
 	public class InteractiveUiBase extends Sprite implements IUiBase
 	{
-		public static const NORMAL:int = 0;
-		public static const OVER:int = 1;
-		public static const DOWN:int = 2;
-		public static const SELECTED:int = 3;
-		public static const DISABLE:int = 4;
+		public static const INTERACTIVE_STATUS_NORMAL:int = 0;
+		public static const INTERACTIVE_STATUS_OVER:int = 1;
+		public static const INTERACTIVE_STATUS_DOWN:int = 2;
+		public static const INTERACTIVE_STATUS_SELECTED:int = 3;
+		public static const INTERACTIVE_STATUS_DISABLE:int = 4;
 		
 		protected var status:uint;
 		protected var statusLen:uint;
@@ -74,7 +74,7 @@ package cn.royan.fl.uis
 		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-			removeAllEventListener();
+			removeAllEventListeners();
 			
 			addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
 		}
@@ -87,28 +87,28 @@ package cn.royan.fl.uis
 		
 		protected function mouseOverHandler(evt:MouseEvent):void
 		{
-			if( mouseEnabled ) status = selected?SELECTED:OVER;
+			if( mouseEnabled ) status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_OVER;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["over"] ) callbacks["over"]();
 		}
 		
 		protected function mouseOutHandler(evt:MouseEvent):void
 		{
-			if( mouseEnabled ) status = selected?SELECTED:NORMAL;
+			if( mouseEnabled ) status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_NORMAL;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["out"] ) callbacks["out"]();
 		}
 		
 		protected function mouseDownHandler(evt:MouseEvent):void
 		{
-			if( mouseEnabled ) status = selected?SELECTED:DOWN;
+			if( mouseEnabled ) status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_DOWN;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["down"] ) callbacks["down"]();
 		}
 		
 		protected function mouseUpHandler(evt:MouseEvent):void
 		{
-			if( mouseEnabled ) status = selected?SELECTED:OVER;
+			if( mouseEnabled ) status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_OVER;
 			if( isMouseRender ) draw();
 			if( callbacks && callbacks["up"] ) callbacks();
 		}
@@ -255,7 +255,7 @@ package cn.royan.fl.uis
 			mouseEnabled = value;
 			mouseChildren = value;
 			
-			status = value?NORMAL:DISABLE;
+			status = value?INTERACTIVE_STATUS_NORMAL:INTERACTIVE_STATUS_DISABLE;
 			draw();
 		}
 		
@@ -305,7 +305,7 @@ package cn.royan.fl.uis
 			}
 		}
 		
-		public function removeAllEventListener():void
+		public function removeAllEventListeners():void
 		{
 			if ( evtListenerType == null || evtListenerType.length == 0)
 				return;
@@ -340,7 +340,7 @@ package cn.royan.fl.uis
 			callbacks = null;
 			
 			removeAllChildren();
-			removeAllEventListener();
+			removeAllEventListeners();
 		}
 	}
 }

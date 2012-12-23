@@ -94,7 +94,7 @@ package cn.royan.fl.services
 			urlvariable = null;
 			callbacks = null
 				
-			removeAllEventListener();
+			removeAllEventListeners();
 		}
 		
 		public function get data():*

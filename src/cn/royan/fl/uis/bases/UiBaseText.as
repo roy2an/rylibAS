@@ -50,6 +50,13 @@ package cn.royan.fl.uis.bases
 			inputText.textColor = value;
 		}
 		
+		public function setTextSize(value:int):void
+		{
+			var format:TextFormat = getFormat();
+				format.size = value;
+			inputText.defaultTextFormat = format;
+		}
+		
 		public function getDefaultFormat():TextFormat
 		{
 			if( !defaultFormat ){

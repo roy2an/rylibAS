@@ -130,7 +130,10 @@ package cn.royan.fl.services
 			socket = null;
 			callbacks = null;
 			
-			removeAllEventListener();
+			timer.stop();
+			PoolMap.disposeInstance(timer);
+			
+			removeAllEventListeners();
 		}
 		
 		public function get data():*

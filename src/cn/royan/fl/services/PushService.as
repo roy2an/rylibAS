@@ -90,7 +90,7 @@ package cn.royan.fl.services
 			urlrequest = null;
 			urlvariable = null;
 			callbacks = null;
-			removeAllEventListener();
+			removeAllEventListeners();
 		}
 		
 		public function get data():*

@@ -1,6 +1,7 @@
 package cn.royan.fl.uis.embeds
 {
 	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.bases.TimerBase;
 	import cn.royan.fl.interfaces.uis.IUiPlayBase;
 	import cn.royan.fl.utils.SystemUtils;
 	
@@ -8,29 +9,28 @@ package cn.royan.fl.uis.embeds
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
-	import flash.utils.Timer;
 	
 	public class UiEmbedMovieClip extends MovieClip implements IUiPlayBase
 	{
-		protected var eventMap:Dictionary;
-		protected var timer:Timer;
+		protected var timer:TimerBase;
 		protected var bindToFrameRate:Boolean;
 		protected var current:int;
 		protected var toFrame:int;
 		protected var sequence:Boolean;
 		protected var loop:Boolean;
 		
+		protected var evtListenerType:Array;
+		protected var evtListenerDirectory:Array
+		
 		public function UiEmbedMovieClip(auto:Boolean = true, rate:int = 30)
 		{
 			super();
 			
 			bindToFrameRate = auto;
-			eventMap = new Dictionary(true);
 			
 			if( !bindToFrameRate )
 			{
-				timer = PoolMap.getInstanceByType(Timer, 1000 / rate);
-				timer.addEventListener(TimerEvent.TIMER, timerHandler);
+				timer = PoolMap.getInstanceByType(TimerBase, 1000 / rate, timerHandler);
 			}else{
 				addEventListener(Event.ENTER_FRAME, enterframeHandler);
 			}
@@ -46,7 +46,7 @@ package cn.royan.fl.uis.embeds
 			addEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
 		}
 		
-		protected function timerHandler(evt:TimerEvent):void
+		protected function timerHandler():void
 		{
 			if( sequence )
 			{
@@ -134,36 +134,80 @@ package cn.royan.fl.uis.embeds
 			}
 		}
 		
-		public function dispose():void
-		{
-			PoolMap.disposeInstance(timer);
-		}
-		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-			if( timer && timer.hasEventListener(TimerEvent.TIMER) )
-				timer.removeEventListener(TimerEvent.TIMER, timerHandler);
+			if( timer ) timer.stop();
 			
-			for( var type:String in eventMap )
-			{
-				removeEventListener( type, eventMap[type] );
-				eventMap[type] = null;
-				delete eventMap[type];
-			}
+			removeAllEventListeners();
+			
+			addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
 		}
 		
-		override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
+		override public function addEventListener( type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false ):void 
 		{
-			eventMap[type] = listener;
+			if ( evtListenerDirectory == null ) {
+				evtListenerDirectory = [];
+				evtListenerType = [];
+			}
+			var dir:Dictionary = new Dictionary();
+			dir[ type ] = listener;
+			evtListenerDirectory.push( dir );
+			evtListenerType.push( type );
 			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
 		}
 		
-		override public function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
+		override public function removeEventListener( type:String, listener:Function, useCapture:Boolean = false ):void 
 		{
-			eventMap[type] = null;
-			delete eventMap[type];
+			super.removeEventListener(type, listener, useCapture);
+			if ( evtListenerDirectory != null ) {
+				for ( var i:int = 0; i < evtListenerDirectory.length; i++ ) {
+					var dir:Dictionary = evtListenerDirectory[i];
+					if ( dir[ type ] == null ) {
+						continue;
+					}else {
+						if ( dir[ type ] != listener ) {
+							continue
+						}else {
+							evtListenerType.splice( i, 1 );
+							evtListenerDirectory.splice( i, 1 );
+							delete dir[ type ];
+							dir = null;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		public function removeAllEventListeners():void
+		{
+			if ( evtListenerType == null || evtListenerType.length == 0)
+				return;
+			for ( var i:int = 0; i < evtListenerType.length; i++)
+			{
+				var type:String = evtListenerType[i];
+				var dic:Dictionary = evtListenerDirectory[i];
+				var fun:Function = dic[ type ];
+				removeEventListener( type, fun );
+			}
+		}
+		
+		public function removeAllChildren():void
+		{
+			while ( numChildren > 0 ) {
+				removeChildAt( 0 );
+			}
+		}
+		
+		public function dispose():void
+		{
+			if(timer) {
+				timer.stop();
+				PoolMap.disposeInstance(timer);
+			}
 			
-			super.removeEventListener(type, listener, useCapture );
+			removeAllChildren();
+			removeAllEventListeners();
 		}
 	}
 }

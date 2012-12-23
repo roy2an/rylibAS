@@ -44,7 +44,7 @@ package cn.royan.fl.bases
 			}
 		}
 		
-		public function removeAllEventListener():void
+		public function removeAllEventListeners():void
 		{
 			if ( evtListenerType == null || evtListenerType.length == 0)
 				return;

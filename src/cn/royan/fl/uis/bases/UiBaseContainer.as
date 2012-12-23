@@ -1,11 +1,12 @@
 package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.interfaces.uis.IUiBase;
+	import cn.royan.fl.interfaces.uis.IUiContainerBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
 	import flash.display.DisplayObject;
 	
-	public class UiBaseContainer extends InteractiveUiBase
+	public class UiBaseContainer extends InteractiveUiBase implements IUiContainerBase
 	{
 		public static const LEFT:uint = 1;
 		public static const RIGHT:uint = 2;
@@ -67,14 +68,30 @@ package cn.royan.fl.uis.bases
 			draw();
 		}
 		
-		public function removeAllItem():void
+		public function removeAllItems():void
 		{
 			while( items.length ){
 				removeChild(items.shift());
 			}
 		}
 		
-		public function setHorizontalAlign(value:uint):void
+		public function getIndexByItem(item:IUiBase):int
+		{
+			return items.indexOf(item);
+		}
+		
+		public function getItemAt(index:int):IUiBase
+		{
+			if( index < 0 || index >= items.length ) return null;
+			return items[index];
+		}
+		
+		public function getItems():Vector.<IUiBase>
+		{
+			return items;
+		}
+		
+		public function setHorizontalAlign(value:int):void
 		{
 			horizontalAlign = value;
 			draw();
@@ -86,28 +103,12 @@ package cn.royan.fl.uis.bases
 			draw();
 		}
 		
-		public function getItems():Vector.<IUiBase>
-		{
-			return items;
-		}
-		
-		public function getIndexByItem(item:IUiBase):int
-		{
-			return items.indexOf(item);
-		}
-		
-		public function getItemByIndex(index:int):IUiBase
-		{
-			if( index < 0 || index >= items.length ) return null;
-			return items[index];
-		}
-		
 		public function setGaps(gapX:int, gapY:int):void
 		{
 			gaps = {x:gapX, y:gapY};
 		}
 		
-		public function setMargin(left:int, top:int, right:int, bottom:int):void
+		public function setMargins(left:int, top:int, right:int, bottom:int):void
 		{
 			margins = {l:left,t:top,r:right,b:bottom};
 		}

@@ -1,6 +1,7 @@
 package cn.royan.fl.utils
 {
 	import cn.royan.fl.bases.PoolMap;
+	import cn.royan.fl.uis.bases.UiBaseText;
 	
 	import flash.net.LocalConnection;
 	import flash.system.ApplicationDomain;
@@ -12,13 +13,20 @@ package cn.royan.fl.utils
 	public class SystemUtils
 	{
 		public static var showDebug:Boolean;
+		public static var debugText:UiBaseText;
 		public static var ukey:Array = ["A","B","C","D","E","F","G","H"];
 		
 		private static var __loaderContext:LoaderContext;
 		
 		public static function print(...args):void
 		{
-			if( showDebug ) trace(getTimer() +"|"+ args);
+			if( showDebug ){
+				if(debugText){
+					debugText.appendText(getTimer()+"|"+args+"\n");
+					debugText.setScroll(0, debugText.getMaxScroll()[1]);
+				}
+				else trace(getTimer() +"|"+ args);
+			}
 		}
 		
 		public static function createUniqueID():String

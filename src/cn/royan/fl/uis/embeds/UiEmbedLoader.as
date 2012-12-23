@@ -60,10 +60,5 @@ package cn.royan.fl.uis.embeds
 		{
 			
 		}
-		
-		override public function dispose():void
-		{
-			super.dispose();
-		}
 	}
 }

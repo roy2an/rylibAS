@@ -91,8 +91,6 @@ package cn.royan.fl.uis.bases
 				currentFrame.bitmapData = bgTextures[current - 1];
 			
 			addChild(currentFrame);
-			
-			SystemUtils.print("Finish");
 		}
 		
 		override protected function addToStageHandler(evt:Event = null):void
@@ -216,8 +214,8 @@ package cn.royan.fl.uis.bases
 				delete bgTextures[i];
 			}
 			
-			if( timer )
-				PoolMap.disposeInstance(timer);
+			timer.stop();
+			PoolMap.disposeInstance(timer);
 		}
 		
 		override protected function removeFromStageHandler(evt:Event):void

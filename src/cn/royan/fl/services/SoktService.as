@@ -81,7 +81,7 @@ package cn.royan.fl.services
 			socket.removeEventListener(Event.CLOSE, onClose);
 			socket = null;
 			callbacks = null;
-			removeAllEventListener();
+			removeAllEventListeners();
 		}
 		
 		public function get data():*

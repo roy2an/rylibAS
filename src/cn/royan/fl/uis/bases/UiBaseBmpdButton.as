@@ -44,8 +44,6 @@ package cn.royan.fl.uis.bases
 			addChild(currentStatus);
 			
 			isMouseRender = true;
-			
-			SystemUtils.print("Finish");
 		}
 		
 		protected function drawTextures():void
@@ -108,7 +106,7 @@ package cn.royan.fl.uis.bases
 		{
 			if( isInGroup ){
 				selected = !selected;
-				status = selected?SELECTED:status;
+				status = selected?INTERACTIVE_STATUS_SELECTED:status;
 				
 				draw();
 			}
@@ -129,7 +127,7 @@ package cn.royan.fl.uis.bases
 		public function setSelected(value:Boolean):void
 		{
 			selected = value;
-			status = selected?SELECTED:NORMAL;
+			status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_NORMAL;
 			draw();
 		}
 		
