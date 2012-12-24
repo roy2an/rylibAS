@@ -153,14 +153,19 @@ package cn.royan.fl.uis.bases
 			btnLabelText.setEmbedFont(value);
 		}
 		
-		public function setFormat(value:TextFormat):void
+		public function setFormat(value:TextFormat,begin:int=-1,end:int=-1):void
 		{
-			btnLabelText.setFormat(value);
+			btnLabelText.setFormat(value,begin,end);
 		}
 		
-		public function getFormat():TextFormat
+		public function getFormat(begin:int=-1,end:int=-1):TextFormat
 		{
-			return btnLabelText.getFormat();
+			return btnLabelText.getFormat(begin,end);
+		}
+		
+		public function setDefaultFormat(value:TextFormat):void
+		{
+			btnLabelText.setDefaultFormat(value);
 		}
 		
 		public function getDefaultFormat():TextFormat

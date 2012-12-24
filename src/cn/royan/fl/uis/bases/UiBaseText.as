@@ -28,14 +28,29 @@ package cn.royan.fl.uis.bases
 			addChild(inputText);
 		}
 		
-		public function setFormat(format:TextFormat):void
+		public function setFormat(format:TextFormat, begin:int=-1, end:int=-1):void
+		{
+			inputText.setTextFormat(format,begin,end);
+		}
+		
+		public function getFormat(begin:int=-1, end:int=-1):TextFormat
+		{
+			return inputText.getTextFormat(begin,end);
+		}
+		
+		public function setDefaultFormat(format:TextFormat):void
 		{
 			inputText.defaultTextFormat = format;
 		}
 		
-		public function getFormat():TextFormat
+		public function getDefaultFormat():TextFormat
 		{
-			return inputText.getTextFormat();
+			if( !defaultFormat ){
+				defaultFormat = PoolMap.getInstanceByType(TextFormat);
+				defaultFormat.align = TextFormatAlign.CENTER;
+				defaultFormat.size = 14;
+			}
+			return defaultFormat;
 		}
 		
 		public function setTextAlign(value:String):void
@@ -55,16 +70,6 @@ package cn.royan.fl.uis.bases
 			var format:TextFormat = getFormat();
 				format.size = value;
 			inputText.defaultTextFormat = format;
-		}
-		
-		public function getDefaultFormat():TextFormat
-		{
-			if( !defaultFormat ){
-				defaultFormat = PoolMap.getInstanceByType(TextFormat);
-				defaultFormat.align = TextFormatAlign.CENTER;
-				defaultFormat.size = 14;
-			}
-			return defaultFormat;
 		}
 		
 		public function setScroll(h:int=0, v:int=0):void

@@ -18,8 +18,9 @@ package cn.royan.fl.interfaces.uis
 		
 		function setEmbedFont(value:Boolean):void;
 		
-		function setFormat(value:TextFormat):void;
-		function getFormat():TextFormat;
+		function setFormat(value:TextFormat, begin:int=-1, end:int=-1):void;
+		function getFormat(begin:int=-1, end:int=-1):TextFormat;
+		function setDefaultFormat(value:TextFormat):void;
 		function getDefaultFormat():TextFormat;
 		
 		function setScroll(sx:int=0, sy:int=0):void;
