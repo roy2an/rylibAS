@@ -3,6 +3,7 @@ package cn.royan.fl.resources
 	import cn.royan.fl.bases.DispacherBase;
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.bases.WeakMap;
+	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.IDisposeBase;
 	import cn.royan.fl.services.TakeService;
 	import cn.royan.fl.uis.embeds.UiEmbedLoader;
@@ -86,6 +87,11 @@ package cn.royan.fl.resources
 			callbacks = value;
 		}
 		
+		public function containerInitComplete():void
+		{
+			if( root.contains(loader) ) root.removeChild(loader);
+		}
+		
 		protected function loaderOnProgressHandler(loaded:uint, total:uint):void
 		{
 			SystemUtils.print("[Class ResourceLoader]:Loader File OnProgress");
@@ -99,6 +105,7 @@ package cn.royan.fl.resources
 			takeService.dispose();
 			
 			loader = SystemUtils.getInstanceByClassName("LoaderClass") as UiEmbedLoader;
+			loader.addEventListener(DatasEvent.DATA_DONE, loaderAnimationCompleteHandler);
 			
 			root.addChild( loader );
 			
@@ -109,6 +116,11 @@ package cn.royan.fl.resources
 									  doing:configFileOnProgressHandler,
 									  error:configFileOnErrorHandler});
 			load();
+		}
+		
+		protected function loaderAnimationCompleteHandler(evt:DatasEvent):void
+		{
+			if( root.contains(loader) ) root.removeChild(loader);
 		}
 		
 		protected function loaderOnErrorHandler(message:String):void
@@ -170,7 +182,7 @@ package cn.royan.fl.resources
 				if( callbacks && callbacks['synDone'] ) callbacks['synDone']();
 				asynFileStartLoadHandler();	
 				
-				if( root.contains(loader) ) root.removeChild(loader);
+//				if( root.contains(loader) ) root.removeChild(loader);
 				return;
 			}
 		}

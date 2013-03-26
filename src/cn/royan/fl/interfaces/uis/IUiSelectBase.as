@@ -4,10 +4,10 @@ package cn.royan.fl.interfaces.uis
 	
 	import flash.events.EventDispatcher;
 
-	public interface IUiSelectBase extends IDisposeBase
+	public interface IUiSelectBase extends IDisposeBase, IUiBase
 	{
 		function setSelected(value:Boolean):void;
 		function getSelected():Boolean;
-		function getDispatcher():EventDispatcher;
+		function setIsInGroup(value:Boolean):void;
 	}
 }

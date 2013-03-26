@@ -11,7 +11,7 @@ package cn.royan.fl.uis.embeds
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
 
-	public class UiEmbedButton extends UiEmbedMovieClip implements IUiSelectBase
+	public class UiEmbedButton extends UiEmbedMovieClip// implements IUiSelectBase
 	{
 		protected var selected:Boolean;
 		protected var jump:Boolean;

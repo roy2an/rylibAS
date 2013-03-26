@@ -45,13 +45,18 @@ package cn.royan.fl.uis
 					graphics.beginBitmapFill(bgTexture);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
-				}else if(  bgAlphas && bgAlphas.length > 1 ){
+				}else if( bgAlphas && bgAlphas.length > 1 ){
+					if( matrix == null ) matrix = PoolMap.getInstanceByType(Matrix);
 					matrix.createGradientBox(containerWidth, containerHeight, Math.PI / 2, 0, 0);
 					graphics.beginGradientFill(GradientType.LINEAR, bgColors, bgAlphas, [0,255], matrix);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}else if(  bgAlphas && bgAlphas.length > 0 && bgAlphas[0] > 0 ){
 					graphics.beginFill( bgColors[0], bgAlphas[0] );
+					graphics.drawRect( 0, 0, containerWidth, containerHeight );
+					graphics.endFill();
+				}else{
+					graphics.beginFill( 0xFFFFFF, 0 );
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}

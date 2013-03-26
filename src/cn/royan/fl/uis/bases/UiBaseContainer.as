@@ -2,11 +2,15 @@ package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.interfaces.uis.IUiContainerBase;
+	import cn.royan.fl.interfaces.uis.IUiScrollableBase;
+	import cn.royan.fl.interfaces.uis.IUiStateBase;
+	import cn.royan.fl.interfaces.uis.IUiStateContainerBase;
 	import cn.royan.fl.uis.InteractiveUiBase;
 	
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	
-	public class UiBaseContainer extends InteractiveUiBase implements IUiContainerBase
+	public class UiBaseContainer extends InteractiveUiBase implements IUiContainerBase, IUiStateContainerBase, IUiScrollableBase
 	{
 		public static const LEFT:uint = 1;
 		public static const RIGHT:uint = 2;
@@ -25,20 +29,38 @@ package cn.royan.fl.uis.bases
 		protected var itemsWidth:int;
 		protected var itemsHeight:int;
 		
-		public function UiBaseContainer()
+		protected var container:InteractiveUiBase;
+		protected var scroller:UiBaseScroller;
+		
+		protected var states:Vector.<String>;
+		protected var current:String;
+		
+		public function UiBaseContainer(texture:BitmapData = null)
 		{
+			super(texture);
+			
 			items = new Vector.<IUiBase>();
+			states = new Vector.<String>();
+			
+			container = new InteractiveUiBase();
+			addChild(container);
+			
+			scroller = new UiBaseScroller(container);
+			
+			setBackgroundAlphas([0]);
 		}
 		
-		public function addItem(item:IUiBase):void
+		public function addItem(item:IUiBase):IUiBase
 		{
 			items.push(item);
 			
-			addChild(item as DisplayObject);
+			container.addChild(item as DisplayObject);
 			draw();
+			
+			return item;
 		}
 		
-		public function addItemAt(item:IUiBase, index:int):void
+		public function addItemAt(item:IUiBase, index:int):IUiBase
 		{
 			var start:Vector.<IUiBase> = items.slice(0, index);
 			var end:Vector.<IUiBase> = items.slice(index);
@@ -46,32 +68,33 @@ package cn.royan.fl.uis.bases
 			
 			items = start.concat(end);
 			
-			addChildAt( item as DisplayObject, index );
+			container.addChildAt( item as DisplayObject, index );
 			draw();
+			
+			return item;
 		}
 		
-		public function removeItem(item:IUiBase):void
+		public function removeItem(item:IUiBase):IUiBase
 		{
-			if( contains(item as DisplayObject) ) removeChild(item as DisplayObject);
+			if( container.contains(item as DisplayObject) ) container.removeChild(item as DisplayObject);
 			items.splice( items.indexOf(item), 1);
 			draw();
+			
+			return item;
 		}
 		
-		public function removeItemAt(index:int):void
+		public function removeItemAt(index:int):IUiBase
 		{
-			if( index < 0 || index >= items.length ) return;
+			if( index < 0 || index >= items.length ) return null;
 			
-			if( contains( items[index] as DisplayObject ) ) 
-				removeChild(items[index] as DisplayObject);
-			items.splice( index, 1);
-			
-			draw();
+			var item:IUiBase = items[index];
+			return removeItem(item);
 		}
 		
 		public function removeAllItems():void
 		{
 			while( items.length ){
-				removeChild(items.shift());
+				container.removeChild(items.shift());
 			}
 		}
 		
@@ -113,10 +136,81 @@ package cn.royan.fl.uis.bases
 			margins = {l:left,t:top,r:right,b:bottom};
 		}
 		
+		public function setState(value:String):void
+		{
+			if( states.indexOf(value) == -1 )
+				return;
+			
+			current = value;
+			
+			var i:int;
+			for(i = 0; i < numChildren; i++){
+				if( getChildAt(i) is IUiStateBase ){
+					var item:IUiStateBase = IUiStateBase(getChildAt(i));
+					if( item.getInclude().indexOf(current) != -1 ){
+						(item as DisplayObject).visible = true;
+					}
+					if( item.getExclude().indexOf(current) != -1 ){
+						(item as DisplayObject).visible = false;
+					}
+				}
+			}
+		}
+		
+		public function getState():String
+		{
+			return current;
+		}
+		
+		public function setScrollerSize(cWidth:int, cHeight:int):void
+		{
+			scroller.setSize(cWidth, cHeight);
+		}
+		
+		public function setScrollerType(type:int):void
+		{
+			scroller.setType(type);
+		}
+		
+		public function setScrollerThumbTexture(texture:Object):void
+		{
+			scroller.setThumbTexture(texture);
+		}
+		
+		public function setScrollerMinTexture(texture:Object):void
+		{
+			scroller.setMinTexture(texture);
+		}
+		
+		public function setScrollerMaxTexture(texture:Object):void
+		{
+			scroller.setMaxTexture(texture);
+		}
+		
+		public function setScrollerBackgroundTextrue(texture:Object):void
+		{
+			scroller.setBackgroundTextrue(texture);
+		}
+		
+		override public function setSize(cWidth:int, cHeight:int):void
+		{
+			super.setSize(cWidth, cHeight);
+			
+			if( scroller ) scroller.setContainerSize(cWidth, cHeight);
+		}
+		
 		override public function draw():void
 		{
-			fillRowHandler();
-			drawRowHandler();
+			super.draw();
+			
+			if( items ){
+				fillRowHandler();
+				drawRowHandler();
+			}
+			
+			if( scroller ){
+				scroller.show(containerHeight < height, containerWidth < width);
+			}
 		}
 		
 		protected function fillRowHandler():void
@@ -143,6 +237,9 @@ package cn.royan.fl.uis.bases
 			for ( i = 0; i < items.length; i++ ) {
 				
 				var item:IUiBase = items[i] as IUiBase;
+					item.setPosition(0, 0);
+				if ( !(item as DisplayObject).visible ) continue;
+				
 				if ( rowW + ( (i > 0 ? 1:0) * gapX + item.getSize()[0] ) > containerWidth - marginL - marginR ) {
 					//prev row end
 					rows.push( { width: rowW, height: rowH, length:itemNumber } );
@@ -209,10 +306,17 @@ package cn.royan.fl.uis.bases
 				}
 				
 				var j:int;
-				for( j = 0; j < rows[i].length; j++ ){
+				
+				for ( j = 0; j < rows[i].length; ) {
+					if ( !(items[z] as DisplayObject).visible ) {
+						z++;
+						continue;
+					}
+					
 					items[z].setPosition( offsetX, offsetY );
 					offsetX += items[z].getSize()[0] + gapX;
 					z++;
+					j++;
 				}
 				offsetY += rows[i].height + gapY;
 			}

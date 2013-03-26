@@ -1,18 +1,20 @@
 package cn.royan.fl.uis.bases
 {
 	import cn.royan.fl.events.DatasEvent;
+	import cn.royan.fl.interfaces.uis.IUiBase;
 	import cn.royan.fl.interfaces.uis.IUiGroupBase;
 	import cn.royan.fl.interfaces.uis.IUiSelectBase;
-	import cn.royan.fl.interfaces.uis.IUiBase;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flash.utils.Dictionary;
 
 	public class UiBaseGroupContainer extends UiBaseContainer implements IUiGroupBase
 	{
 		public static const ITEM_SELECTED:String = 'item_selected';
 		
-		protected var selectedItems:Vector.<IUiSelectBase>;
+		protected var keys:Dictionary;
+		
 		protected var isMulti:Boolean;
 		protected var isMust:Boolean;
 		protected var maxLen:uint;
@@ -22,31 +24,37 @@ package cn.royan.fl.uis.bases
 		{
 			super();
 			
-			selectedItems = new Vector.<IUiSelectBase>();
-			
+			keys = new Dictionary(true);
 			values = [];
 		}
 		
-		public function addGroupItem(item:*, key:*=null):void
+		public function addGroupItem(item:IUiSelectBase, key:*):void
 		{
 			if(item.getDispatcher() == null) return;
 			
 			item.setIsInGroup(true);
 			item.getDispatcher().addEventListener(DatasEvent.DATA_DONE, clickHandler);
 			
-			selectedItems[key] = item;
+			keys[item] = key;
+			
 			addItem(item);
-		}
-		
-		override public function addItem(item:IUiBase):void
-		{
-			addChild(item as DisplayObject);
-			draw();
 		}
 		
 		public function getValues():Array
 		{
 			return values;
+		}
+		
+		public function setValues(array:Array):void
+		{
+			var i:int;
+			for(i = 0; i< values.length; i++){
+				getValue(values[i]).setSelected(false);
+			}
+			values = array;
+			for(i = 0; i < array.length; i++){
+				getValue(array[i]).setSelected(true);
+			}
 		}
 		
 		public function setIsMust(value:Boolean):void
@@ -66,11 +74,16 @@ package cn.royan.fl.uis.bases
 		
 		protected function getKey(value:*):*
 		{
-			for( var i:* in selectedItems )
+			return keys[value];
+		}
+		
+		protected function getValue(key:*):IUiSelectBase
+		{
+			for (var item:* in keys)
 			{
-				if( selectedItems[i] == value )
+				if( keys[item] == key )
 				{
-					return selectedItems[i];
+					return item;
 				}
 			}
 			return null;
@@ -80,56 +93,32 @@ package cn.royan.fl.uis.bases
 		{
 			var key:* = getKey(evt.currentTarget);
 			var giveUpKey:*;
-			if(values.indexOf(key) == -1){
-				if(!isMust){
-					values.splice(values.indexOf(key), 1);
-					selectedItems[key].setSelected(false);
-				}
-			}else{
+			if(values.indexOf(key) == -1){//未找到
 				if( isMulti ){
-					if( maxLen > values.length )
-					{
+					if( maxLen > values.length ){
 						values.push(key);
 					}else{
 						giveUpKey = values.shift();
-						if(selectedItems[giveUpKey])
-							selectedItems[giveUpKey].setSelected(false);
+						if(getValue(giveUpKey))
+							getValue(giveUpKey).setSelected(false);
 						values.push(key);
-						selectedItems[key].setSelected(true);
+						getValue(key).setSelected(true);
 					}
 				}else{
 					giveUpKey = values.shift();
-					if(selectedItems[giveUpKey])
-						selectedItems[giveUpKey].setSelected(false);
-					values = [key];
-					selectedItems[key].setSelected(true);
+					if(getValue(giveUpKey))
+						getValue(giveUpKey).setSelected(false);
+					values.push(key);//values = [key];
+					getValue(key).setSelected(true);
+				}
+			}else{//找到(取消)
+				if(!isMust){//不是必须的
+					values.splice(values.indexOf(key), 1);
+					getValue(key).setSelected(false);
 				}
 			}
-		}
-		
-		override public function dispose():void
-		{
-			super.dispose();
 			
-			var i:int = 0;
-			var len:int = selectedItems.length;
-			for( i; i < len; i++ ){
-				selectedItems[i].dispose();
-				delete selectedItems[i];
-			}
-			
-			selectedItems = null;
-		}
-		
-		override protected function removeFromStageHandler(evt:Event):void
-		{
-			var i:int = 0;
-			var len:int = selectedItems.length;
-			for( i; i < len; i++ ){
-				if( selectedItems[i] && selectedItems[i].getDispatcher().hasEventListener(DatasEvent.DATA_DONE) )
-					selectedItems[i].getDispatcher().removeEventListener(DatasEvent.DATA_DONE, clickHandler);
-			}
-			super.removeFromStageHandler(evt);
+			if( callbacks && callbacks["select"] ) callbacks["select"](values);
 		}
 	}
 }

@@ -28,6 +28,20 @@ package cn.royan.fl.uis.bases
 			addChild(inputText);
 		}
 		
+		override public function setSize(cWidth:int, cHeight:int):void
+		{
+			super.setSize(cWidth, cHeight);
+			
+			inputText.width = cWidth;
+			inputText.height = cHeight;
+		}
+		
+		public function autoSize(type:String):void
+		{
+			inputText.autoSize = type;
+			inputText.width = containerWidth;
+		}
+		
 		public function setFormat(format:TextFormat, begin:int=-1, end:int=-1):void
 		{
 			inputText.setTextFormat(format,begin,end);

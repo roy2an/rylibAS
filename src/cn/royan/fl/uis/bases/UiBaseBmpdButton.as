@@ -43,7 +43,9 @@ package cn.royan.fl.uis.bases
 			
 			addChild(currentStatus);
 			
-			isMouseRender = true;
+			setMouseRender(true);
+			
+			buttonMode = true;
 		}
 		
 		protected function drawTextures():void
@@ -93,7 +95,7 @@ package cn.royan.fl.uis.bases
 		
 		override public function draw():void
 		{
-			if( currentStatus && bgTextures[status] )
+			if( currentStatus && status < bgTextures.length && bgTextures[status] )
 				currentStatus.bitmapData = bgTextures[status];
 		}
 		

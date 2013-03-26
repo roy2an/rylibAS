@@ -29,6 +29,15 @@ package cn.royan.fl.utils
 			}
 		}
 		
+		public static function replace(orgin:String, ...args):String
+		{
+			var i:int;
+			for( i = 1; i <= args.length; i++ ){
+				orgin = orgin.replace("{"+i+"}", args[i - 1]);
+			}
+			return orgin;
+		}
+		
 		public static function createUniqueID():String
 		{
 			var uid:String = "";

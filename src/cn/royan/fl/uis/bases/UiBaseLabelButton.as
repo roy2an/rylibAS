@@ -18,6 +18,7 @@ package cn.royan.fl.uis.bases
 		protected var btnLabel:String;
 		protected var btnLabelText:UiBaseText;
 		protected var btnBackground:InteractiveUiBase;
+		protected var textColors:Array;
 		
 		public function UiBaseLabelButton(label:String="")
 		{
@@ -34,6 +35,8 @@ package cn.royan.fl.uis.bases
 				bgTextures[i].setBackgroundAlphas(bgAlphas[i].length > 1?bgAlphas[i]:[bgAlphas[i]]);
 			}
 			
+			textColors = getDefaultTextColor();
+			
 			btnBackground = PoolMap.getInstanceByType(InteractiveUiBase);
 			addChild(btnBackground);
 			
@@ -42,12 +45,17 @@ package cn.royan.fl.uis.bases
 			addChild(btnLabelText);
 			
 			setMouseRender(true);
+			
+			buttonMode = true;
 		}
 		
 		override public function draw():void
 		{
+			btnBackground.removeAllChildren();
 			if( bgTextures[status] )
 				btnBackground.addChild(bgTextures[status]);
+			
+			btnLabelText.setTextColor(textColors[status]);
 		}
 		
 		override protected function mouseClickHandler(evt:MouseEvent):void
@@ -62,14 +70,49 @@ package cn.royan.fl.uis.bases
 			super.mouseClickHandler(evt);
 		}
 		
+		public function getDefaultTextColor():Array
+		{
+			return [0x000000,0xFF0000,0xFFFFFF,0xFFFFFF,0xCCCCCC];
+		}
+		
 		override public function getDefaultBackgroundColors():Array
 		{
-			return [[0xFFFFFF,0x00ff64],[0x00ff64,0x00c850],[0x00c850,0xe9f48e],[0xe9f48e,0xa2a29e],[0xa2a29e,0xFFFFFF]];
+			return [[0xFFFFFF,0xFFFFFF],[0xFFFFFF,0xFFFFFF],[0xFFFFFF,0xFFFFFF],[0xFFFFFF,0xFFFFFF],[0xFFFFFF,0xFFFFFF]];
 		}
 		
 		override public function getDefaultBackgroundAlphas():Array
 		{
 			return [[1,1],[1,1],[1,1],[1,1],[1,1]];
+		}
+		
+		public function autoSize(type:String):void
+		{
+			btnLabelText.autoSize(type);
+		}
+		
+		public function setTextColors(value:Array):void
+		{
+			textColors = value.concat();
+			draw();
+		}
+		
+		override public function setBackgroundColors(value:Array):void
+		{
+			super.setBackgroundColors(value);
+			var i:int;
+			for( i = 0; i < statusLen; i++){
+				bgTextures[i].setBackgroundColors(bgColors[i].length > 1?bgColors[i]:[bgColors[i]]);
+			}
+		}
+		
+		override public function setBackgroundAlphas(value:Array):void
+		{
+			super.setBackgroundAlphas(value);
+			
+			var i:int;
+			for( i = 0; i < statusLen; i++){
+				bgTextures[i].setBackgroundAlphas(bgAlphas[i].length > 1?bgAlphas[i]:[bgAlphas[i]]);
+			}
 		}
 		
 		public function setSelected(value:Boolean):void

@@ -3,6 +3,7 @@ package cn.royan.fl.uis
 	import cn.royan.fl.bases.PoolMap;
 	import cn.royan.fl.events.DatasEvent;
 	import cn.royan.fl.interfaces.uis.IUiBase;
+	import cn.royan.fl.interfaces.uis.IUiStateBase;
 	
 	import flash.display.BitmapData;
 	import flash.display.GradientType;
@@ -14,13 +15,16 @@ package cn.royan.fl.uis
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
 
-	public class InteractiveUiBase extends Sprite implements IUiBase
+	public class InteractiveUiBase extends Sprite implements IUiBase, IUiStateBase
 	{
 		public static const INTERACTIVE_STATUS_NORMAL:int = 0;
 		public static const INTERACTIVE_STATUS_OVER:int = 1;
 		public static const INTERACTIVE_STATUS_DOWN:int = 2;
 		public static const INTERACTIVE_STATUS_SELECTED:int = 3;
 		public static const INTERACTIVE_STATUS_DISABLE:int = 4;
+		
+		protected var excludes:Vector.<String>;
+		protected var includes:Vector.<String>;
 		
 		protected var status:uint;
 		protected var statusLen:uint;
@@ -69,12 +73,24 @@ package cn.royan.fl.uis
 			
 			addEventListener(MouseEvent.CLICK, 			mouseClickHandler);
 			
+//			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+			
 			draw();
 		}
 		
 		protected function removeFromStageHandler(evt:Event):void
 		{
-			removeAllEventListeners();
+			//removeAllEventListeners();
+			removeEventListener(Event.REMOVED_FROM_STAGE, 	removeFromStageHandler);
+			
+			removeEventListener(MouseEvent.MOUSE_OVER, 	mouseOverHandler);
+			removeEventListener(MouseEvent.MOUSE_OUT, 	mouseOutHandler);
+			removeEventListener(MouseEvent.MOUSE_DOWN, 	mouseDownHandler);
+			removeEventListener(MouseEvent.MOUSE_UP, 	mouseUpHandler);
+			
+//			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+			
+			removeEventListener(MouseEvent.CLICK, 		mouseClickHandler);
 			
 			addEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
 		}
@@ -110,7 +126,7 @@ package cn.royan.fl.uis
 		{
 			if( mouseEnabled ) status = selected?INTERACTIVE_STATUS_SELECTED:INTERACTIVE_STATUS_OVER;
 			if( isMouseRender ) draw();
-			if( callbacks && callbacks["up"] ) callbacks();
+			if( callbacks && callbacks["up"] ) callbacks["up"]();
 		}
 		
 		public function draw():void
@@ -122,6 +138,7 @@ package cn.royan.fl.uis
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}else if( bgAlphas && bgAlphas.length > 1 ){
+					if( matrix == null ) matrix = PoolMap.getInstanceByType(Matrix);
 					matrix.createGradientBox(containerWidth, containerHeight, Math.PI / 2, 0, 0);
 					graphics.beginGradientFill(GradientType.LINEAR, bgColors, bgAlphas, [0,255], matrix);
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
@@ -131,7 +148,7 @@ package cn.royan.fl.uis
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}else{
-					graphics.beginFill( 0xFFFFFF, .1 );
+					graphics.beginFill( 0xFFFFFF, 0 );
 					graphics.drawRect( 0, 0, containerWidth, containerHeight );
 					graphics.endFill();
 				}
@@ -267,6 +284,44 @@ package cn.royan.fl.uis
 		public function setCallbacks(value:Object):void
 		{
 			callbacks = value;
+		}
+		
+		public function setExclude(state:String, ...args):void
+		{
+			if( excludes == null ){
+				excludes = new Vector.<String>();
+			}
+			excludes.push(state);
+			
+			var i:int;
+			var len:int = args.length;
+			for(i = 0; i < len; i++){
+				excludes.push(args[i]);
+			}
+		}
+		
+		public function getExclude():Vector.<String>
+		{
+			return excludes;
+		}
+		
+		public function setInclude(state:String, ...args):void
+		{
+			if( includes == null ){
+				includes = new Vector.<String>();
+			}
+			includes.push(state);
+			
+			var i:int;
+			var len:int = args.length;
+			for(i = 0; i < len; i++){
+				includes.push(args[i]);
+			}
+		}
+		
+		public function getInclude():Vector.<String>
+		{
+			return includes;
 		}
 		
 		override public function addEventListener( type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false ):void 

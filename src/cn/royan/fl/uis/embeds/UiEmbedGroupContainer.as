@@ -4,7 +4,7 @@ package cn.royan.fl.uis.embeds
 	import cn.royan.fl.interfaces.uis.IUiGroupBase;
 	import cn.royan.fl.interfaces.uis.IUiSelectBase;
 
-	public class UiEmbedGroupContainer extends UiEmbedSprite implements IUiGroupBase
+	public class UiEmbedGroupContainer extends UiEmbedSprite// implements IUiGroupBase
 	{
 		protected var items:Vector.<IUiSelectBase>;
 		protected var isMulti:Boolean;

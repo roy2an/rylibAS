@@ -4,6 +4,8 @@ package cn.royan.fl.interfaces.uis
 
 	public interface IUiTextBase extends IUiBase
 	{
+		function autoSize(type:String):void;
+		
 		function setText(value:String):void;
 		function appendText(value:String):void;
 		function getText():String;

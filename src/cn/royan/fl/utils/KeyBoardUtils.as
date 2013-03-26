@@ -16,8 +16,8 @@ package cn.royan.fl.utils
             if ( keyObj == null ) {
                 keys = { };
 				
-                display.stage.addEventListener( KeyboardEvent.KEY_DOWN, KeyBoardUtils.keyDownHandler );
-                display.stage.addEventListener( KeyboardEvent.KEY_UP, KeyBoardUtils.keyUpHandler );
+                display.stage.addEventListener( KeyboardEvent.KEY_DOWN, KeyBoardUtils.keyDownHandler, false, 99, true );
+                display.stage.addEventListener( KeyboardEvent.KEY_UP, KeyBoardUtils.keyUpHandler, false, 99, true );
 				
 				keyObj = new KeyBoardUtils();
             }
